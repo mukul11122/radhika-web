@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" width="220" height="220">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d8a4f"/>
+      <stop offset="1" stop-color="#04663a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="110" cy="110" r="105" fill="url(#g)"/>
+  <circle cx="110" cy="110" r="96" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="4 6" opacity="0.8"/>
+  <!-- medical cross -->
+  <rect x="98" y="44" width="24" height="86" rx="6" fill="#ffffff"/>
+  <rect x="63" y="79" width="94" height="24" rx="6" fill="#ffffff"/>
+  <!-- text arc -->
+  <path id="top" d="M30 110 A80 80 0 0 1 190 110" fill="none"/>
+  <path id="bot" d="M34 110 A76 76 0 0 0 186 110" fill="none"/>
+  <text font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#ffffff" letter-spacing="1">
+    <textPath href="#top" startOffset="50%" text-anchor="middle">JANA AUSHADHI</textPath>
+  </text>
+  <text font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#ffd34d" letter-spacing="2">
+    <textPath href="#bot" startOffset="50%" text-anchor="middle">PMBJP · GOVT OF INDIA</textPath>
+  </text>
+</svg>

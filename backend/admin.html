@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Radhika Agencies Submissions</title>
+<link rel="icon" href="assets/img/radhika-logo.svg" type="image/svg+xml">
+<style>
+  :root{--green:#0d8a4f;--green-d:#04663a;--ink:#1c2b22;--muted:#5d6b63;--alt:#f3f8f5}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--alt);color:var(--ink);line-height:1.5}
+  .wrap{width:min(1100px,94%);margin:0 auto;padding:30px 0}
+  header{background:var(--green);color:#fff;padding:18px 0}
+  header .wrap{display:flex;justify-content:space-between;align-items:center;padding:0}
+  h1{font-size:1.4rem}
+  .card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 8px 24px rgba(4,102,58,.1);margin-top:20px}
+  input{padding:11px 14px;border:1px solid #cfdbd4;border-radius:10px;font-size:1rem;width:100%}
+  label{display:block;margin-bottom:12px;font-weight:600}
+  button{background:var(--green);color:#fff;border:none;padding:11px 22px;border-radius:50px;font-weight:600;cursor:pointer}
+  button:hover{background:var(--green-d)}
+  .btn-ghost{background:#fff;color:var(--green);border:2px solid var(--green)}
+  .msg{margin-top:10px;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.92rem}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e6efe9}
+  th{background:var(--green);color:#fff;position:sticky;top:0}
+  tr:nth-child(even){background:#fafdfb}
+  .table-scroll{max-height:60vh;overflow:auto;border-radius:10px}
+  .hidden{display:none}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .err{color:#c0392b}
+  .ok{color:var(--green-d)}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><h1>Radhika Agencies — Submissions Panel</h1><span id="who"></span></div></header>
+
+<div class="wrap">
+
+  <!-- Login -->
+  <div class="card" id="loginCard">
+    <h2>Admin Login</h2>
+    <form id="loginForm" style="margin-top:14px;max-width:360px">
+      <label>Username<input type="text" name="user" required></label>
+      <label>Password<input type="password" name="pass" required></label>
+      <button type="submit">Login</button>
+      <p class="msg" id="loginMsg"></p>
+    </form>
+  </div>
+
+  <!-- Panel -->
+  <div class="card hidden" id="panelCard">
+    <div class="topbar">
+      <h2>Submissions</h2>
+      <span id="lastUpdated" style="font-weight:500;color:var(--muted);font-size:.85rem"></span>
+      <div>
+        <label style="display:inline-block;margin:0 8px 0 0;font-weight:500">Filter
+          <select id="typeFilter" style="width:auto;display:inline-block;padding:8px 10px">
+            <option value="">All</option>
+            <option value="enquiry">Enquiry</option>
+            <option value="order">Bulk Order</option>
+            <option value="contact">Contact</option>
+          </select>
+        </label>
+        <button class="btn-ghost" id="downloadBtn">Download Excel</button>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </div>
+    <p class="msg ok" id="count"></p>
+    <div class="table-scroll">
+      <table id="enqTable">
+        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Name</th><th>Email</th><th>Phone</th><th>Organization</th><th>City/State</th><th>Kendra Code</th><th>Details</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="msg err hidden" id="errMsg"></p>
+  </div>
+
+</div>
+
+<script>
+const TOKEN_KEY='radhika_admin_token';
+const loginCard=document.getElementById('loginCard');
+const panelCard=document.getElementById('panelCard');
+
+function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
+
+document.getElementById('loginForm').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const data=Object.fromEntries(fd.entries());
+  const msg=document.getElementById('loginMsg');
+  msg.className='msg';msg.textContent='Logging in...';
+  try{
+    const res=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const out=await res.json();
+    if(out.ok){ localStorage.setItem(TOKEN_KEY,out.token); showPanel(); }
+    else { msg.className='msg err'; msg.textContent='❌ '+out.message; }
+  }catch(err){ msg.className='msg err'; msg.textContent='❌ Server error'; }
+});
+
+let refreshTimer=null;
+function showPanel(){
+  loginCard.classList.add('hidden');
+  panelCard.classList.remove('hidden');
+  document.getElementById('who').textContent='';
+  loadEnquiries();
+  refreshTimer=setInterval(loadEnquiries,5000);
+}
+function showLogin(){ if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;} panelCard.classList.add('hidden'); loginCard.classList.remove('hidden'); }
+function showLogin(){ panelCard.classList.add('hidden'); loginCard.classList.remove('hidden'); }
+
+document.getElementById('logoutBtn').addEventListener('click',()=>{
+  localStorage.removeItem(TOKEN_KEY); showLogin();
+});
+
+document.getElementById('downloadBtn').addEventListener('click',()=>{
+  window.location.href='/api/admin/download?token='+encodeURIComponent(getToken());
+});
+
+document.getElementById('typeFilter').addEventListener('change',loadEnquiries);
+
+async function loadEnquiries(){
+  const tbody=document.querySelector('#enqTable tbody');
+  const err=document.getElementById('errMsg');
+  err.classList.add('hidden');
+  try{
+    const res=await fetch('/api/admin/enquiries',{headers:{'Authorization':'Bearer '+getToken()}});
+    if(res.status===401){ localStorage.removeItem(TOKEN_KEY); showLogin(); return; }
+    const out=await res.json();
+    if(!out.ok) throw new Error(out.message);
+    const filter=document.getElementById('typeFilter').value;
+    const rows=out.enquiries.filter(r=>!filter||r.type===filter);
+    document.getElementById('count').textContent='Showing '+rows.length+' of '+out.enquiries.length+' submissions';
+    document.getElementById('lastUpdated').textContent='Last updated: '+new Date().toLocaleTimeString('en-IN');
+    tbody.innerHTML=rows.map(r=>`<tr>
+      <td>${r.id}</td><td>${esc(r.date)}</td><td>${esc(r.type)}</td><td>${esc(r.name)}</td>
+      <td>${esc(r.email)||'—'}</td><td>${esc(r.phone)}</td><td>${esc(r.organization)||'—'}</td>
+      <td>${esc(r.city)||''}${r.state?', '+esc(r.state):''}</td>
+      <td>${esc(r.kendraCode)||'—'}</td><td>${esc(r.details||r.subject||'—')}</td></tr>`).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--muted)">No submissions yet.</td></tr>';
+  }catch(e){
+    err.textContent='❌ '+e.message; err.classList.remove('hidden');
+  }
+}
+function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+if(getToken()) showPanel();
+</script>
+</body>
+</html>

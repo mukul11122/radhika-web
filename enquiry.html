@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Enquiry — Radhika Agencies</title>
+  <meta name="description" content="Submit your enquiry to Radhika Agencies. Mandatory: name, location, contact. Optional: store code and question.">
+  <link rel="icon" href="assets/img/logo.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="container">
+      <span>☎️ <a href="tel:+917500272292">+91 75002 72292</a> | <a href="tel:+919897420190">+91 98974 20190</a></span>
+      <span>✉️ <a href="mailto:radhikaagenciesddun@gmail.com">radhikaagenciesddun@gmail.com</a></span>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <img src="assets/img/logo.svg" alt="Radhika Agencies" class="logo-img">
+        <span>Radhika Agencies<small>Authorised Jan Aushadhi Distributor</small></span>
+      </a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+      <nav class="nav" id="nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="medicines.html">Medicines &amp; Pricing</a>
+        <a href="order.html">Bulk Order</a>
+        <a href="contact.html">Contact</a>
+        <a href="enquiry.html" class="active">Enquiry</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">General Enquiry</span>
+      <h1>Customer Enquiry</h1>
+      <p>Fill in your details and our team will get back to you. Fields marked * are required.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <form class="form" id="enquiryForm" novalidate style="max-width:680px">
+        <div class="row">
+          <div class="field">
+            <label>Name <span class="req">*</span></label>
+            <input type="text" name="name" required>
+          </div>
+          <div class="field">
+            <label>Location <span class="req">*</span></label>
+            <input type="text" name="location" required placeholder="City / Area">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Contact No <span class="req">*</span></label>
+            <input type="tel" name="contact" required placeholder="10-digit mobile">
+          </div>
+          <div class="field">
+            <label>Store Code</label>
+            <input type="text" name="storeCode" placeholder="optional">
+          </div>
+        </div>
+        <div class="field">
+          <label>Question / Message</label>
+          <textarea name="question" rows="4" placeholder="optional"></textarea>
+        </div>
+        <div class="msg" style="display:none"></div>
+        <button type="submit" class="btn btn-primary">Submit Enquiry</button>
+        <p class="note">Your enquiry is stored securely and also notifies our team by email.</p>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="grid">
+        <div>
+          <h4>RA · Radhika Agencies</h4>
+          <p>Authorised distributor supplying Jan Aushadhi (PMBJP) medicines to Kendras and government institutions.</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="medicines.html">Medicines</a></li>
+            <li><a href="order.html">Bulk Order</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="enquiry.html">Enquiry</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Resources &amp; Contact</h4>
+          <ul>
+            <li><a href="https://janaushadhi.gov.in" target="_blank" rel="noopener">janaushadhi.gov.in</a></li>
+            <li><a href="https://pmbjp.gov.in" target="_blank" rel="noopener">PMBJP Portal</a></li>
+            <li><address>93, Tagore Villa,<br>Chakrata Road,<br>Dehradun – 248001, Uttarakhand</address></li>
+            <li><a href="tel:+917500272292">+91 75002 72292</a></li>
+            <li><a href="mailto:radhikaagenciesddun@gmail.com">radhikaagenciesddun@gmail.com</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copy">© Radhika Agencies. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

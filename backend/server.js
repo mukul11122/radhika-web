@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const CONFIG = {
-  notifyEmail: process.env.NOTIFY_EMAIL || 'radhikaagenciesddun@gmail.com',
+  notifyEmail: process.env.NOTIFY_EMAIL || 'info@radhikaagencies.com,radhikaagencies@ymail.com',
   adminUser: process.env.ADMIN_USER || 'admin',
   adminPass: process.env.ADMIN_PASS || 'admin',
   adminSecret: process.env.ADMIN_SECRET || 'dev-secret-change-me',

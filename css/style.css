@@ -223,7 +223,7 @@ img { max-width: 100%; display: block; }
 .cta .btn-outline:hover { background: rgba(255,255,255,.16); }
 
 /* Footer */
-.footer { background: #0b1b15; color: #cfe6da; padding: 54px 0 26px; }
+.footer { background: #0b1535; color: #c5d4f0; padding: 54px 0 26px; }
 .footer .grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 36px; text-align: left; }
 .footer h4 { color: #fff; margin-bottom: 16px; font-size: 1.02rem; font-family: "Inter", sans-serif; letter-spacing: .3px; }
 .footer a:hover { color: #fff; text-decoration: underline; }

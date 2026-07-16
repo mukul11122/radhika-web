@@ -209,6 +209,15 @@ app.get('/api/admin/download', auth, async (req, res) => {
   }
 });
 
+// Keep-alive: ping self every 10 minutes to prevent Render free-tier sleep
+if (process.env.RENDER) {
+  const KEEPALIVE_MS = 10 * 60 * 1000;
+  setInterval(() => {
+    const host = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+    fetch(`${host}/api/health`).catch(() => {});
+  }, KEEPALIVE_MS);
+}
+
 // Find a free port starting from PORT (avoids clobbering an already-running server)
 function listenOn(port) {
   const srv = app.listen(port, () => {

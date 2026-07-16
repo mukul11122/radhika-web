@@ -5,7 +5,7 @@ services:
     rootDir: backend
     buildCommand: npm install
     startCommand: node server.js
-    pullRequestPreviewsEnabled: true
+    autoDeploy: true
     envVars:
       - key: NODE_VERSION
         value: "22"

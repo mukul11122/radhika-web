@@ -21,8 +21,8 @@ const CONFIG = {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT || 587),
     secure: process.env.SMTP_SECURE === 'true',
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || ''
+    user: process.env.SMTP_USER || 'radhikaagenciesddun@gmail.com',
+    pass: process.env.SMTP_PASS || 'pxob dtoz nhfl olio'
   }
 };
 

@@ -1,16 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap');
 
 :root {
-  --green: #0d8a4f;
-  --green-dark: #04663a;
-  --green-light: #e7f5ee;
+  --green: #1e4fd6;
+  --green-dark: #14318f;
+  --green-light: #eaf0fb;
   --ink: #131a2a;
   --muted: #5b6678;
   --bg: #ffffff;
   --bg-alt: #f4f7fc;
   --border: #e2e9f3;
-  --shadow: 0 10px 30px rgba(13, 138, 79, .08);
-  --shadow-lg: 0 18px 50px rgba(13, 138, 79, .14);
+  --shadow: 0 10px 30px rgba(30, 79, 214, .08);
+  --shadow-lg: 0 18px 50px rgba(30, 79, 214, .14);
   --radius: 16px;
   --maxw: 1140px;
 }

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courier — Upload Dockets | Radhika Agencies</title>
+<link rel="icon" href="assets/img/radhika-logo.svg" type="image/svg+xml">
+<style>
+  :root{--green:#0d8a4f;--green-d:#04663a;--ink:#1c2b22;--muted:#5d6b63;--alt:#f3f8f5}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--alt);color:var(--ink);line-height:1.5}
+  .wrap{width:min(820px,94%);margin:0 auto;padding:30px 0}
+  header{background:var(--green);color:#fff;padding:18px 0}
+  header .wrap{display:flex;justify-content:space-between;align-items:center;padding:0}
+  h1{font-size:1.4rem}
+  .card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 8px 24px rgba(4,102,58,.1);margin-top:20px}
+  input[type=text],input[type=password],input[type=file]{padding:11px 14px;border:1px solid #cfdbd4;border-radius:10px;font-size:1rem;width:100%}
+  label{display:block;margin-bottom:12px;font-weight:600}
+  button{background:var(--green);color:#fff;border:none;padding:11px 22px;border-radius:50px;font-weight:600;cursor:pointer}
+  button:hover{background:var(--green-d)}
+  .btn-ghost{background:#fff;color:var(--green);border:2px solid var(--green)}
+  .msg{margin-top:10px;font-weight:600}
+  .hidden{display:none}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .err{color:#c0392b}
+  .ok{color:var(--green-d)}
+  .hint{font-size:.85rem;color:var(--muted);background:var(--alt);border:1px solid #e0ebe5;border-radius:10px;padding:12px 14px;margin-top:14px}
+  .hint code{background:#fff;padding:1px 5px;border-radius:5px;border:1px solid #e0ebe5}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><h1>Courier — Docket Upload</h1><span id="who"></span></div></header>
+
+<div class="wrap">
+
+  <!-- Login -->
+  <div class="card" id="loginCard">
+    <h2>Courier Login</h2>
+    <form id="loginForm" style="margin-top:14px;max-width:360px">
+      <label>Username<input type="text" name="user" required></label>
+      <label>Password<input type="password" name="pass" required></label>
+      <button type="submit">Login</button>
+      <p class="msg" id="loginMsg"></p>
+    </form>
+  </div>
+
+  <!-- Upload panel -->
+  <div class="card hidden" id="panelCard">
+    <div class="topbar">
+      <h2>Upload Dockets (Excel)</h2>
+      <button class="btn-ghost" id="logoutBtn">Logout</button>
+    </div>
+    <form id="uploadForm" style="margin-top:16px">
+      <label>Excel file (.xlsx)
+        <input type="file" name="file" accept=".xlsx,.xlsm" required>
+      </label>
+      <button type="submit">Upload &amp; Import</button>
+      <p class="msg" id="uploadMsg"></p>
+    </form>
+    <div class="hint">
+      <strong>Excel column format</strong> — use exactly these headers (row order doesn't matter; matching is flexible):<br>
+      <code>DATE</code> &nbsp; <code>STORECODE</code> &nbsp; <code>COURIER NAME</code> &nbsp; <code>TRACKING NUMBER</code> &nbsp; <code>MOBILE NUMBER</code><br>
+      <code>MOBILE NUMBER</code> is required (customers look up by it). If no separate docket/invoice number is provided,
+      each row is keyed by its <code>TRACKING NUMBER</code>. Rows without a valid mobile are skipped.
+    </div>
+  </div>
+
+</div>
+
+<script>
+const TOKEN_KEY='radhika_courier_token';
+const loginCard=document.getElementById('loginCard');
+const panelCard=document.getElementById('panelCard');
+function getToken(){ return localStorage.getItem(TOKEN_KEY)||''; }
+
+document.getElementById('loginForm').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const data=Object.fromEntries(fd.entries());
+  const msg=document.getElementById('loginMsg');
+  msg.className='msg';msg.textContent='Logging in...';
+  try{
+    const res=await fetch('/api/courier/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const out=await res.json();
+    if(out.ok){ localStorage.setItem(TOKEN_KEY,out.token); showPanel(); }
+    else { msg.className='msg err'; msg.textContent='❌ '+out.message; }
+  }catch(err){ msg.className='msg err'; msg.textContent='❌ Server error'; }
+});
+
+function showPanel(){
+  loginCard.classList.add('hidden');
+  panelCard.classList.remove('hidden');
+  document.getElementById('who').textContent='';
+}
+function showLogin(){ panelCard.classList.add('hidden'); loginCard.classList.remove('hidden'); }
+
+document.getElementById('logoutBtn').addEventListener('click',()=>{
+  localStorage.removeItem(TOKEN_KEY); showLogin();
+});
+
+document.getElementById('uploadForm').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const fileInput=e.target.querySelector('input[type=file]');
+  const msg=document.getElementById('uploadMsg');
+  const file=fileInput.files[0];
+  if(!file){ msg.className='msg err'; msg.textContent='Please choose an Excel file.'; return; }
+  msg.className='msg'; msg.textContent='Reading file...';
+  const reader=new FileReader();
+  reader.onload=async()=>{
+    try{
+      const body={ filename:file.name, data:reader.result };
+      const res=await fetch('/api/courier/dockets/upload',{
+        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+        body:JSON.stringify(body)
+      });
+      const out=await res.json();
+      if(res.status===401){ localStorage.removeItem(TOKEN_KEY); showLogin(); return; }
+      if(out.ok){ msg.className='msg ok'; msg.textContent='✅ '+out.message; e.target.reset(); }
+      else { msg.className='msg err'; msg.textContent='❌ '+out.message; }
+    }catch(err){ msg.className='msg err'; msg.textContent='❌ Network error'; }
+  };
+  reader.onerror=()=>{ msg.className='msg err'; msg.textContent='❌ Could not read file'; };
+  reader.readAsDataURL(file);
+});
+
+if(getToken()){ showPanel(); }
+</script>
+</body>
+</html>

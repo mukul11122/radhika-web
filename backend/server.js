@@ -12,11 +12,33 @@ try { require('dotenv').config(); } catch (e) { /* dotenv optional */ }
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Multiple courier accounts. Set COURIER_ACCOUNTS="user1:pass1,user2:pass2,..." in env to override.
+// Default accounts (CHANGE these before going live):
+const DEFAULT_COURIER_ACCOUNTS = [
+  { user: 'courier1', pass: 'roZBhIeStc' },
+  { user: 'courier2', pass: 'Xvc0wT5pq18' },
+  { user: 'courier3', pass: 'VYGh4wew' },
+  { user: 'courier4', pass: 'nYTKJ5Vdej4' },
+  { user: 'courier5', pass: 'hZKZCyG0vc8' }
+];
+function parseCourierAccounts() {
+  const raw = process.env.COURIER_ACCOUNTS;
+  if (raw && raw.trim()) {
+    const parsed = raw.split(',').map(s => s.trim()).filter(Boolean).map(pair => {
+      const idx = pair.indexOf(':');
+      return { user: pair.slice(0, idx).trim(), pass: pair.slice(idx + 1).trim() };
+    }).filter(a => a.user && a.pass);
+    if (parsed.length) return parsed;
+  }
+  return DEFAULT_COURIER_ACCOUNTS;
+}
+
 const CONFIG = {
   notifyEmail: process.env.NOTIFY_EMAIL || 'info@radhikaagencies.com,radhikaagencies@ymail.com',
   adminUser: process.env.ADMIN_USER || 'admin',
   adminPass: process.env.ADMIN_PASS || 'admin',
   adminSecret: process.env.ADMIN_SECRET || 'dev-secret-change-me',
+  courierAccounts: parseCourierAccounts(),
   smtp: {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: Number(process.env.SMTP_PORT || 587),
@@ -29,8 +51,8 @@ const CONFIG = {
 const VALID_TYPES = ['enquiry', 'order', 'contact'];
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 // Block access to backend internals (source, .env, data) over HTTP
 app.use((req, res, next) => {
@@ -54,13 +76,23 @@ function verifyToken(token) {
   const [payload, sig] = token.split('.');
   const expected = crypto.createHmac('sha256', CONFIG.adminSecret).update(payload).digest('base64url');
   if (sig !== expected) return false;
-  try { const data = JSON.parse(Buffer.from(payload, 'base64url').toString()); return data.user === CONFIG.adminUser; }
+  try { const data = JSON.parse(Buffer.from(payload, 'base64url').toString()); return data.user; }
   catch { return false; }
 }
 function auth(req, res, next) {
   const token = req.headers['authorization'] || req.query.token || '';
   const clean = token.replace(/^Bearer\s+/i, '');
-  if (!verifyToken(clean)) return res.status(401).json({ ok: false, message: 'Unauthorized' });
+  if (verifyToken(clean) !== CONFIG.adminUser) return res.status(401).json({ ok: false, message: 'Unauthorized' });
+  next();
+}
+function isCourier(user) {
+  return Array.isArray(CONFIG.courierAccounts) && CONFIG.courierAccounts.some(a => a.user === user);
+}
+function authCourier(req, res, next) {
+  const token = req.headers['authorization'] || req.query.token || '';
+  const clean = token.replace(/^Bearer\s+/i, '');
+  const user = verifyToken(clean);
+  if (!user || !isCourier(user)) return res.status(401).json({ ok: false, message: 'Unauthorized' });
   next();
 }
 
@@ -183,6 +215,132 @@ app.post('/api/admin/login', (req, res) => {
     return res.json({ ok: true, token: makeToken(user) });
   }
   res.status(401).json({ ok: false, message: 'Invalid credentials' });
+});
+
+// Courier login (any of the configured courier accounts)
+app.post('/api/courier/login', (req, res) => {
+  const { user, pass } = req.body || {};
+  const account = (CONFIG.courierAccounts || []).find(a => a.user === user && a.pass === pass);
+  if (account) {
+    return res.json({ ok: true, token: makeToken(account.user) });
+  }
+  res.status(401).json({ ok: false, message: 'Invalid credentials' });
+});
+
+// ---------- Docket column mapping (Excel headers -> fields) ----------
+const DOCKET_FIELD_ALIASES = {
+  mobile: ['mobile', 'mobile number', 'phone', 'contact', 'contact number', 'whatsapp', 'mob'],
+  docket_no: ['docket no', 'docket', 'docket no.', 'invoice', 'invoice no', 'invoice no.', 'lr', 'lr no', 'lr no.', 'consignment', 'challan', 'challan no'],
+  courier: ['courier', 'courier name', 'transporter', 'transport', 'carrier'],
+  tracking: ['tracking', 'tracking no', 'tracking number', 'tracking id', 'awb', 'awb no', 'awb number'],
+  status: ['status', 'dispatch status', 'current status', 'delivery status'],
+  dispatch_date: ['date', 'dispatch date', 'dispatched on', 'ship date', 'dispatch dt'],
+  organization: ['organization', 'org', 'storecode', 'store code', 'kendra', 'kendra name', 'customer', 'customer name', 'party', 'party name'],
+  items: ['items', 'item details', 'description', 'contents', 'product', 'products', 'details', 'remarks']
+};
+
+function mapDocketRow(headers, row) {
+  const norm = headers.map(h => String(h == null ? '' : h).trim().toLowerCase());
+  const used = new Set();
+  const get = (field) => {
+    for (const alias of DOCKET_FIELD_ALIASES[field]) {
+      for (let i = 0; i < norm.length; i++) {
+        if (used.has(i)) continue;
+        const h = norm[i];
+        if (!h) continue;
+        if (h === alias || h.includes(alias) || (alias.length >= 3 && alias.includes(h))) {
+          used.add(i);
+          const v = row[i];
+          return v == null ? '' : v;
+        }
+      }
+    }
+    return '';
+  };
+  return {
+    mobile: get('mobile'),
+    docket_no: get('docket_no'),
+    courier: get('courier'),
+    tracking: get('tracking'),
+    status: get('status'),
+    dispatch_date: get('dispatch_date'),
+    organization: get('organization'),
+    items: get('items')
+  };
+}
+
+// Courier: upload dockets via Excel (base64) — protected
+app.post('/api/courier/dockets/upload', authCourier, async (req, res) => {
+  try {
+    const { filename, data } = req.body || {};
+    if (!data || typeof data !== 'string') {
+      return res.status(400).json({ ok: false, message: 'No file data provided.' });
+    }
+    const buf = Buffer.from(data.replace(/^data:.*;base64,/, ''), 'base64');
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buf);
+    const sheet = workbook.worksheets[0];
+    if (!sheet) return res.status(400).json({ ok: false, message: 'Excel sheet is empty.' });
+
+    const headerRow = sheet.getRow(1).values.slice(1);
+    let inserted = 0, skipped = 0;
+    for (let r = 2; r <= sheet.rowCount; r++) {
+      const cells = sheet.getRow(r).values.slice(1);
+      if (!cells || cells.length === 0 || cells.every(v => v === null || v === undefined || String(v).trim() === '')) continue;
+      const mapped = mapDocketRow(headerRow, cells);
+      if (!db.normalizePhone(mapped.mobile)) { skipped++; continue; }
+      await db.upsertDocket(mapped);
+      inserted++;
+    }
+    res.json({ ok: true, inserted, skipped, message: `Imported ${inserted} docket(s), skipped ${skipped} row(s) without a valid mobile number.` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: 'Failed to parse file. Ensure it is a valid .xlsx workbook.' });
+  }
+});
+
+// Public: customer looks up dockets by mobile number
+// Rate limit: max 5 lookups per (normalized) mobile number per minute.
+const docketRateLimit = new Map(); // mobile -> [timestamps]
+const DOCKET_RL_MAX = 5;
+const DOCKET_RL_WINDOW = 60 * 60 * 1000;
+setInterval(() => {
+  const now = Date.now();
+  for (const [mobile, hits] of docketRateLimit) {
+    const fresh = hits.filter(t => now - t < DOCKET_RL_WINDOW);
+    if (fresh.length) docketRateLimit.set(mobile, fresh);
+    else docketRateLimit.delete(mobile);
+  }
+}, DOCKET_RL_WINDOW).unref();
+
+function checkDocketRateLimit(mobile) {
+  const now = Date.now();
+  const hits = (docketRateLimit.get(mobile) || []).filter(t => now - t < DOCKET_RL_WINDOW);
+  if (hits.length >= DOCKET_RL_MAX) {
+    docketRateLimit.set(mobile, hits);
+    return false;
+  }
+  hits.push(now);
+  docketRateLimit.set(mobile, hits);
+  return true;
+}
+
+app.get('/api/docket', async (req, res) => {
+  try {
+    const phone = req.query.phone || '';
+    const mobile = db.normalizePhone(phone);
+    if (!mobile) {
+      return res.status(400).json({ ok: false, message: 'Please enter a valid mobile number.' });
+    }
+    if (!checkDocketRateLimit(mobile)) {
+      return res.status(429).json({ ok: false, message: 'Too many lookups. Please try again after an hour.' });
+    }
+    const dockets = await db.getDocketsByPhone(mobile);
+    res.json({ ok: true, found: dockets.length > 0, dockets });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: 'Server error. Please try again.' });
+  }
 });
 
 // List submissions (protected)

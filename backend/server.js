@@ -54,9 +54,14 @@ app.use(cors());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Block access to backend internals (source, .env, data) over HTTP
+// Block access to backend internals (source, .env, data) over HTTP,
+// but allow the two public backend HTML pages (admin + courier upload).
 app.use((req, res, next) => {
-  if (req.path.toLowerCase().startsWith('/backend')) return res.status(404).end();
+  const p = req.path.toLowerCase();
+  if (p.startsWith('/backend')) {
+    const allowed = ['/backend/admin.html', '/backend/courier-upload.html'];
+    if (!allowed.includes(p)) return res.status(404).end();
+  }
   next();
 });
 

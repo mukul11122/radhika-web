@@ -156,7 +156,17 @@ async function sendEmail(data) {
 }
 
 // ---------- Endpoints ----------
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+// Health check also pings the database, so external monitors (GitHub Actions,
+// UptimeRobot) keep the Aiven free MySQL service awake.
+app.get('/api/health', async (req, res) => {
+  try {
+    await db.ping();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[health] db ping failed:', err.message);
+    res.status(503).json({ ok: false });
+  }
+});
 
 // Shared submission handler
 async function handleSubmit(req, res) {

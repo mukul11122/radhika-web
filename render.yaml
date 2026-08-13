@@ -27,3 +27,17 @@ services:
         sync: false
       - key: ADMIN_SECRET
         sync: false
+      - key: DB_TYPE
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASS
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_SSL
+        sync: false

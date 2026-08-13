@@ -28,6 +28,9 @@ async function initDB() {
   const m = getMode();
   if (m === 'mysql') {
     const mysql = require('mysql2/promise');
+    const ssl = process.env.DB_SSL === 'true'
+      ? { ssl: { rejectUnauthorized: false } }
+      : {};
     mysqlPool = mysql.createPool({
       host: process.env.DB_HOST || 'localhost',
       port: Number(process.env.DB_PORT || 3306),
@@ -35,7 +38,8 @@ async function initDB() {
       password: process.env.DB_PASS || '',
       database: process.env.DB_NAME || 'radhika',
       waitForConnections: true,
-      connectionLimit: 5
+      connectionLimit: 5,
+      ...ssl
     });
     await mysqlPool.query(`CREATE TABLE IF NOT EXISTS ${TABLE} (
       id INT PRIMARY KEY AUTO_INCREMENT,
@@ -105,7 +109,17 @@ async function getSubmissions() {
   }));
 }
 
-module.exports = { initDB, insertSubmission, getSubmissions, normalizePhone, upsertDocket, getDocketsByPhone };
+// Lightweight health check against the active database
+async function ping() {
+  if (mode === 'mysql') {
+    await mysqlPool.query('SELECT 1');
+  } else {
+    sqliteDb.prepare('SELECT 1').get();
+  }
+  return true;
+}
+
+module.exports = { initDB, insertSubmission, getSubmissions, normalizePhone, upsertDocket, getDocketsByPhone, ping };
 
 // Insert or update a docket keyed by (mobile, docket_no).
 // When no docket number is supplied (e.g. courier sheets with just a tracking number),

@@ -309,11 +309,12 @@ app.post('/api/courier/dockets/upload', authCourier, async (req, res) => {
       const mapped = mapDocketRow(headerRow, cells);
       const mobile = db.normalizePhone(mapped.mobile);
       const refNo = String(mapped.docket_no || mapped.tracking || '').trim();
-      if (!mobile && !refNo) { skipped++; continue; }
+      const storeCode = String(mapped.organization || '').trim();
+      if (!mobile && !refNo && !storeCode) { skipped++; continue; }
       await db.upsertDocket(mapped);
       inserted++;
     }
-    res.json({ ok: true, inserted, skipped, message: `Imported ${inserted} docket(s), skipped ${skipped} row(s) with no mobile, docket or tracking number.` });
+    res.json({ ok: true, inserted, skipped, message: `Imported ${inserted} docket(s), skipped ${skipped} row(s) with no mobile number, store code, docket or tracking number.` });
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, message: 'Failed to parse file. Ensure it is a valid .xlsx workbook.' });

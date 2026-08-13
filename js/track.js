@@ -17,7 +17,8 @@ function docketCard(d) {
   function add(label, val) {
     if (val) rows += '<div class="drow"><span class="dlabel">' + esc(label) + '</span><span class="dval">' + esc(val) + '</span></div>';
   }
-  add('Docket / Invoice No.', d.docketNo);
+  var dno = String(d.docketNo || '');
+  if (dno.indexOf('MOB-') !== 0 && dno.indexOf('STORE-') !== 0) add('Docket / Invoice No.', dno);
   add('Courier', d.courier);
   add('Tracking / AWB No.', d.tracking);
   add('Status', d.status);

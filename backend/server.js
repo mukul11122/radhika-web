@@ -257,7 +257,7 @@ const DOCKET_FIELD_ALIASES = {
 };
 
 function mapDocketRow(headers, row) {
-  const norm = headers.map(h => String(h == null ? '' : h).trim().toLowerCase());
+  const norm = headers.map(h => String(h == null ? '' : h).replace(/[_\s]+/g, ' ').trim().toLowerCase());
   const used = new Set();
   const get = (field) => {
     for (const alias of DOCKET_FIELD_ALIASES[field]) {
@@ -301,9 +301,25 @@ app.post('/api/courier/dockets/upload', authCourier, async (req, res) => {
     const sheet = workbook.worksheets[0];
     if (!sheet) return res.status(400).json({ ok: false, message: 'Excel sheet is empty.' });
 
-    const headerRow = sheet.getRow(1).values.slice(1);
+    // Auto-detect the header row: some sheets carry a title/branding row above the headers.
+    const KNOWN_HEADERS = Object.values(DOCKET_FIELD_ALIASES).flat();
+    const normHeader = (c) => String(c == null ? '' : c).replace(/[_\s]+/g, ' ').trim().toLowerCase();
+    let headerRowNum = 0, headerRow = [], bestScore = 0;
+    const scanLimit = Math.min(10, sheet.rowCount);
+    for (let r = 1; r <= scanLimit; r++) {
+      const norm = sheet.getRow(r).values.slice(1).map(normHeader);
+      let score = 0;
+      for (const h of norm) {
+        if (h && KNOWN_HEADERS.some(a => h === a || h.includes(a) || (a.length >= 3 && a.includes(h)))) score++;
+      }
+      if (score > bestScore) { bestScore = score; headerRowNum = r; headerRow = norm; }
+    }
+    if (bestScore === 0) {
+      const top = sheet.getRow(1).values.slice(1).filter(v => v != null && String(v).trim() !== '').join(', ');
+      return res.status(400).json({ ok: false, message: `Could not find a header row with known columns. Top row detected: "${top || '(empty)'}". Expected headers like DATE, STORECODE, DOCKET NO., MOBILE NUMBER.` });
+    }
     let inserted = 0, skipped = 0;
-    for (let r = 2; r <= sheet.rowCount; r++) {
+    for (let r = headerRowNum + 1; r <= sheet.rowCount; r++) {
       const cells = sheet.getRow(r).values.slice(1);
       if (!cells || cells.length === 0 || cells.every(v => v === null || v === undefined || String(v).trim() === '')) continue;
       const mapped = mapDocketRow(headerRow, cells);

@@ -137,12 +137,14 @@ module.exports = { initDB, insertSubmission, getSubmissions, normalizePhone, ups
 // When no docket number is supplied (e.g. courier sheets with just a tracking number),
 // fall back to the tracking number, then to the mobile, then to the store code, so each
 // row stays unique per customer/store. A row is imported if it has ANY of these identifiers.
-async function upsertDocket(data) {
+// rowKey (optional) is appended to store-code-only keys so several rows with the same store
+// code but no other identifier each keep their own row instead of collapsing into one.
+async function upsertDocket(data, rowKey) {
   const mobile = normalizePhone(data.mobile);
   const docketNo = String(data.docket_no || '').trim();
   const tracking = String(data.tracking || '').trim();
   const storeCode = String(data.organization || '').trim();
-  const key = docketNo || tracking || (mobile ? ('MOB-' + mobile) : (storeCode ? ('STORE-' + storeCode.toLowerCase()) : ''));
+  const key = docketNo || tracking || (mobile ? ('MOB-' + mobile) : (storeCode ? ('STORE-' + storeCode.toLowerCase() + (rowKey ? '-' + rowKey : '')) : ''));
   if (!mobile && !docketNo && !tracking && !storeCode) return null;
   const values = {
     mobile,

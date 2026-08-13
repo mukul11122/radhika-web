@@ -311,7 +311,7 @@ app.post('/api/courier/dockets/upload', authCourier, async (req, res) => {
       const refNo = String(mapped.docket_no || mapped.tracking || '').trim();
       const storeCode = String(mapped.organization || '').trim();
       if (!mobile && !refNo && !storeCode) { skipped++; continue; }
-      await db.upsertDocket(mapped);
+      await db.upsertDocket(mapped, r);
       inserted++;
     }
     res.json({ ok: true, inserted, skipped, message: `Imported ${inserted} docket(s), skipped ${skipped} row(s) with no mobile number, store code, docket or tracking number.` });

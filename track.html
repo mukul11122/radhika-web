@@ -40,7 +40,7 @@
     <div class="container">
       <span class="eyebrow">For Kendras &amp; Buyers</span>
       <h1>Track Your Docket</h1>
-      <p>Enter the mobile number you placed your order with to see dispatch &amp; courier tracking details.</p>
+      <p>Enter the mobile number you placed your order with — or your store code — to see dispatch &amp; courier tracking details.</p>
     </div>
   </section>
 
@@ -48,12 +48,16 @@
     <div class="container">
       <form class="form" id="trackForm" novalidate>
         <div class="field">
-          <label>Registered Mobile Number <span class="req">*</span></label>
-          <input type="tel" name="phone" id="phone" inputmode="numeric" placeholder="e.g. 7500272292" required>
+          <label>Registered Mobile Number</label>
+          <input type="tel" name="phone" id="phone" inputmode="numeric" placeholder="e.g. 7500272292">
+        </div>
+        <div class="field">
+          <label>Or Store Code</label>
+          <input type="text" name="store" id="store" placeholder="e.g. JK-101">
         </div>
         <div class="msg" style="display:none"></div>
         <button type="submit" class="btn btn-primary">Track Docket</button>
-        <p class="note">We match your number exactly as shared at the time of ordering. For help, call <a href="tel:+917500272292">+91 75002 72292</a>.</p>
+        <p class="note">Enter your mobile number <em>or</em> store code. We match the number exactly as shared at the time of ordering. For help, call <a href="tel:+917500272292">+91 75002 72292</a>.</p>
       </form>
 
       <div id="results" style="margin-top:34px"></div>

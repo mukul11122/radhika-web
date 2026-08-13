@@ -38,9 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var phone = document.getElementById("phone").value.trim();
-    if (!phone) {
+    var store = document.getElementById("store").value.trim();
+    if (!phone && !store) {
       msg.className = "msg err"; msg.style.display = "block";
-      msg.textContent = "Please enter your mobile number.";
+      msg.textContent = "Please enter a mobile number or store code.";
       return;
     }
     msg.style.display = "none";
@@ -49,7 +50,11 @@ document.addEventListener("DOMContentLoaded", function () {
     var label = btn ? btn.textContent : "";
     if (btn) { btn.disabled = true; btn.textContent = "Tracking…"; }
 
-    fetch("/api/docket?phone=" + encodeURIComponent(phone))
+    var url = phone
+      ? "/api/docket?phone=" + encodeURIComponent(phone)
+      : "/api/docket?store=" + encodeURIComponent(store);
+
+    fetch(url)
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         if (!res.ok || !res.j.ok) {

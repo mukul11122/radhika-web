@@ -346,15 +346,27 @@ function checkDocketRateLimit(mobile) {
 
 app.get('/api/docket', async (req, res) => {
   try {
-    const phone = req.query.phone || '';
-    const mobile = db.normalizePhone(phone);
-    if (!mobile) {
-      return res.status(400).json({ ok: false, message: 'Please enter a valid mobile number.' });
+    const phone = String(req.query.phone || '').trim();
+    const store = String(req.query.store || '').trim();
+    if (!phone && !store) {
+      return res.status(400).json({ ok: false, message: 'Please enter a mobile number or store code.' });
     }
-    if (!checkDocketRateLimit(mobile)) {
-      return res.status(429).json({ ok: false, message: 'Too many lookups. Please try again after an hour.' });
+    let dockets;
+    if (phone) {
+      const mobile = db.normalizePhone(phone);
+      if (!mobile) {
+        return res.status(400).json({ ok: false, message: 'Please enter a valid mobile number.' });
+      }
+      if (!checkDocketRateLimit('p:' + mobile)) {
+        return res.status(429).json({ ok: false, message: 'Too many lookups. Please try again after an hour.' });
+      }
+      dockets = await db.getDocketsByPhone(mobile);
+    } else {
+      if (!checkDocketRateLimit('s:' + store.toLowerCase())) {
+        return res.status(429).json({ ok: false, message: 'Too many lookups. Please try again after an hour.' });
+      }
+      dockets = await db.getDocketsByStore(store);
     }
-    const dockets = await db.getDocketsByPhone(mobile);
     res.json({ ok: true, found: dockets.length > 0, dockets });
   } catch (err) {
     console.error(err);

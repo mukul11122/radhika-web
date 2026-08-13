@@ -131,7 +131,7 @@ async function ping() {
   return true;
 }
 
-module.exports = { initDB, insertSubmission, getSubmissions, normalizePhone, upsertDocket, getDocketsByPhone, ping };
+module.exports = { initDB, insertSubmission, getSubmissions, normalizePhone, upsertDocket, getDocketsByPhone, getDocketsByStore, ping };
 
 // Insert or update a docket keyed by (mobile, docket_no).
 // When no docket number is supplied (e.g. courier sheets with just a tracking number),
@@ -185,6 +185,15 @@ async function upsertDocket(data) {
   return Number(info.lastInsertRowid);
 }
 
+// Map a dockets row to the API shape
+function toDocket(r) {
+  return {
+    mobile: r.mobile, docketNo: r.docket_no, courier: r.courier, tracking: r.tracking,
+    status: r.status, dispatchDate: r.dispatch_date, organization: r.organization, items: r.items,
+    boxes: r.boxes, storeOwner: r.store_owner
+  };
+}
+
 // Return all dockets for a (normalized) mobile number
 async function getDocketsByPhone(rawPhone) {
   const mobile = normalizePhone(rawPhone);
@@ -200,9 +209,23 @@ async function getDocketsByPhone(rawPhone) {
     const stmt = sqliteDb.prepare(`SELECT ${DOCKET_COLS.join(',')} FROM ${DOCKET_TABLE} WHERE mobile=? ORDER BY id DESC`);
     rows = stmt.all(mobile);
   }
-  return rows.map(r => ({
-    mobile: r.mobile, docketNo: r.docket_no, courier: r.courier, tracking: r.tracking,
-    status: r.status, dispatchDate: r.dispatch_date, organization: r.organization, items: r.items,
-    boxes: r.boxes, storeOwner: r.store_owner
-  }));
+  return rows.map(toDocket);
+}
+
+// Return all dockets for a store code (case-insensitive match on the organization/STORE CODE column)
+async function getDocketsByStore(rawStore) {
+  const store = String(rawStore || '').trim().toLowerCase();
+  if (!store) return [];
+  let rows;
+  if (mode === 'mysql') {
+    const [r] = await mysqlPool.query(
+      `SELECT ${DOCKET_COLS.join(',')} FROM ${DOCKET_TABLE} WHERE LOWER(organization)=? ORDER BY id DESC`,
+      [store]
+    );
+    rows = r;
+  } else {
+    const stmt = sqliteDb.prepare(`SELECT ${DOCKET_COLS.join(',')} FROM ${DOCKET_TABLE} WHERE lower(organization)=? ORDER BY id DESC`);
+    rows = stmt.all(store);
+  }
+  return rows.map(toDocket);
 }

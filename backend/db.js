@@ -136,11 +136,13 @@ module.exports = { initDB, insertSubmission, getSubmissions, normalizePhone, ups
 // Insert or update a docket keyed by (mobile, docket_no).
 // When no docket number is supplied (e.g. courier sheets with just a tracking number),
 // fall back to the tracking number, then to the mobile, so each row stays unique per customer.
+// Rows without a mobile number are still imported when a docket/invoice or tracking number exists.
 async function upsertDocket(data) {
   const mobile = normalizePhone(data.mobile);
-  if (!mobile) return null;
   const docketNo = String(data.docket_no || '').trim();
-  const key = docketNo || String(data.tracking || '').trim() || ('MOB-' + mobile);
+  const tracking = String(data.tracking || '').trim();
+  const key = docketNo || tracking || ('MOB-' + mobile);
+  if (!mobile && !docketNo && !tracking) return null;
   const values = {
     mobile,
     docket_no: key,

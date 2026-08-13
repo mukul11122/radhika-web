@@ -60,9 +60,10 @@
     </form>
     <div class="hint">
       <strong>Excel column format</strong> — use exactly these headers (row order doesn't matter; matching is flexible):<br>
-      <code>DATE</code> &nbsp; <code>STORECODE</code> &nbsp; <code>COURIER NAME</code> &nbsp; <code>TRACKING NUMBER</code> &nbsp; <code>NO OF BOX</code> &nbsp; <code>STORE OWNER</code> &nbsp; <code>MOBILE NUMBER</code><br>
-      <code>MOBILE NUMBER</code> is required (customers look up by it). If no separate docket/invoice number is provided,
-      each row is keyed by its <code>TRACKING NUMBER</code>. Rows without a valid mobile are skipped.
+      <code>DATE</code> &nbsp; <code>STORECODE</code> &nbsp; <code>DOCKET NO.</code> &nbsp; <code>COURIER NAME</code> &nbsp; <code>TRACKING NUMBER</code> &nbsp; <code>NO OF BOX</code> &nbsp; <code>STORE OWNER</code> &nbsp; <code>MOBILE NUMBER</code><br>
+      <code>MOBILE NUMBER</code> is what customers look up by — include it when available.
+      Every row needs at least one of <code>MOBILE NUMBER</code>, <code>DOCKET NO.</code> or <code>TRACKING NUMBER</code> to be imported;
+      other fields may be left blank. <code>DOCKET NO.</code> can be alphanumeric (e.g. <code>DJL/2026-07</code>).
     </div>
   </div>
 

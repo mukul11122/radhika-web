@@ -61,9 +61,10 @@
     <div class="hint">
       <strong>Excel column format</strong> — use exactly these headers (row order doesn't matter; matching is flexible):<br>
       <code>DATE</code> &nbsp; <code>STORECODE</code> &nbsp; <code>DOCKET NO.</code> &nbsp; <code>STORE OWNER</code> &nbsp; <code>NO OF BOX</code> &nbsp; <code>MOBILE NUMBER</code> &nbsp; <code>COURIER NAME</code><br>
-      Every row needs at least one of <code>DOCKET NO.</code>, <code>MOBILE NUMBER</code> or <code>STORECODE</code> to be imported.
+      Every row needs at least a <code>DOCKET NO.</code> or <code>MOBILE NUMBER</code> to be imported.
       Re-uploading the same <code>DOCKET NO.</code> + <code>MOBILE NUMBER</code> combination updates the existing row.
-      If your file has a title row above the headers, that's fine — the header row is detected automatically.
+      If your file has no header row, the columns are assumed in the order above.
+      Rows with unexpected data are skipped — the rest still import.
     </div>
   </div>
 

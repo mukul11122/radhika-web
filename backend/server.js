@@ -242,6 +242,17 @@ app.post('/api/courier/login', (req, res) => {
   res.status(401).json({ ok: false, message: 'Invalid credentials' });
 });
 
+// Format Excel date objects to DD/MM/YYYY
+function fmtDate(v) {
+  if (v instanceof Date) {
+    const d = v.getDate().toString().padStart(2, '0');
+    const m = (v.getMonth() + 1).toString().padStart(2, '0');
+    const y = v.getFullYear();
+    return d + '/' + m + '/' + y;
+  }
+  return String(v == null ? '' : v).trim();
+}
+
 // ---------- Docket column mapping (Excel headers -> fields) ----------
 const DOCKET_FIELD_ALIASES = {
   mobile: ['mobile', 'mobile number', 'phone', 'contact', 'contact number', 'whatsapp', 'mob'],
@@ -280,7 +291,7 @@ function mapDocketRow(headers, row) {
     courier: get('courier'),
     tracking: get('tracking'),
     status: get('status'),
-    dispatch_date: get('dispatch_date'),
+    dispatch_date: fmtDate(get('dispatch_date')),
     organization: get('organization'),
     items: get('items'),
     boxes: get('boxes'),
@@ -315,22 +326,27 @@ app.post('/api/courier/dockets/upload', authCourier, async (req, res) => {
       if (score > bestScore) { bestScore = score; headerRowNum = r; headerRow = norm; }
     }
     if (bestScore === 0) {
-      const top = sheet.getRow(1).values.slice(1).filter(v => v != null && String(v).trim() !== '').join(', ');
-      return res.status(400).json({ ok: false, message: `Could not find a header row with known columns. Top row detected: "${top || '(empty)'}". Expected headers like DATE, STORECODE, DOCKET NO., MOBILE NUMBER.` });
+      // No header row found — assume data starts at row 1 in the user's format:
+      // DATE | STORECODE | DOCKET NO. | STORE OWNER | NO OF BOX | MOBILE NUMBER | COURIER NAME
+      headerRowNum = 0;
+      headerRow = ['date', 'storecode', 'docket no.', 'store owner', 'no of box', 'mobile number', 'courier name'];
     }
-    let inserted = 0, skipped = 0;
+    let inserted = 0, skipped = 0, errors = 0;
     for (let r = headerRowNum + 1; r <= sheet.rowCount; r++) {
       const cells = sheet.getRow(r).values.slice(1);
       if (!cells || cells.length === 0 || cells.every(v => v === null || v === undefined || String(v).trim() === '')) continue;
-      const mapped = mapDocketRow(headerRow, cells);
-      const mobile = db.normalizePhone(mapped.mobile);
-      const docketNo = String(mapped.docket_no || '').trim();
-      const storeCode = String(mapped.organization || '').trim();
-      if (!mobile && !docketNo && !storeCode) { skipped++; continue; }
-      await db.upsertDocket(mapped, r);
-      inserted++;
+      try {
+        const mapped = mapDocketRow(headerRow, cells);
+        const mobile = db.normalizePhone(mapped.mobile);
+        const docketNo = String(mapped.docket_no || '').trim();
+        if (!mobile && !docketNo) { skipped++; continue; }
+        await db.upsertDocket(mapped, r);
+        inserted++;
+      } catch (rowErr) {
+        errors++;
+      }
     }
-    res.json({ ok: true, inserted, skipped, message: `Imported ${inserted} docket(s), skipped ${skipped} row(s) with no docket number, mobile number or store code.` });
+    res.json({ ok: true, inserted, skipped, errors, message: `Imported ${inserted} docket(s), skipped ${skipped} row(s)${errors ? ', ' + errors + ' row(s) with errors' : ''}.` });
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, message: 'Failed to parse file. Ensure it is a valid .xlsx workbook.' });

@@ -246,7 +246,7 @@ app.post('/api/courier/login', (req, res) => {
 const DOCKET_FIELD_ALIASES = {
   mobile: ['mobile', 'mobile number', 'phone', 'contact', 'contact number', 'whatsapp', 'mob'],
   docket_no: ['docket no', 'docket', 'docket no.', 'invoice', 'invoice no', 'invoice no.', 'lr', 'lr no', 'lr no.', 'consignment', 'challan', 'challan no'],
-  courier: ['courier', 'courier name', 'transporter', 'transport', 'carrier'],
+  courier: ['courier', 'courier name', 'courier service', 'transporter', 'transport', 'carrier'],
   tracking: ['tracking', 'tracking no', 'tracking number', 'tracking id', 'awb', 'awb no', 'awb number'],
   status: ['status', 'dispatch status', 'current status', 'delivery status'],
   dispatch_date: ['date', 'dispatch date', 'dispatched on', 'ship date', 'dispatch dt'],
@@ -324,13 +324,13 @@ app.post('/api/courier/dockets/upload', authCourier, async (req, res) => {
       if (!cells || cells.length === 0 || cells.every(v => v === null || v === undefined || String(v).trim() === '')) continue;
       const mapped = mapDocketRow(headerRow, cells);
       const mobile = db.normalizePhone(mapped.mobile);
-      const refNo = String(mapped.docket_no || mapped.tracking || '').trim();
+      const docketNo = String(mapped.docket_no || '').trim();
       const storeCode = String(mapped.organization || '').trim();
-      if (!mobile && !refNo && !storeCode) { skipped++; continue; }
+      if (!mobile && !docketNo && !storeCode) { skipped++; continue; }
       await db.upsertDocket(mapped, r);
       inserted++;
     }
-    res.json({ ok: true, inserted, skipped, message: `Imported ${inserted} docket(s), skipped ${skipped} row(s) with no mobile number, store code, docket or tracking number.` });
+    res.json({ ok: true, inserted, skipped, message: `Imported ${inserted} docket(s), skipped ${skipped} row(s) with no docket number, mobile number or store code.` });
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, message: 'Failed to parse file. Ensure it is a valid .xlsx workbook.' });

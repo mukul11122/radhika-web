@@ -60,13 +60,10 @@
     </form>
     <div class="hint">
       <strong>Excel column format</strong> — use exactly these headers (row order doesn't matter; matching is flexible):<br>
-      <code>DATE</code> &nbsp; <code>STORECODE</code> &nbsp; <code>DOCKET NO.</code> &nbsp; <code>COURIER NAME</code> &nbsp; <code>TRACKING NUMBER</code> &nbsp; <code>NO OF BOX</code> &nbsp; <code>STORE OWNER</code> &nbsp; <code>MOBILE NUMBER</code><br>
-      <code>MOBILE NUMBER</code> is what customers look up by — include it when available.
-      Every row needs at least one of <code>MOBILE NUMBER</code>, <code>STORECODE</code>, <code>DOCKET NO.</code> or <code>TRACKING NUMBER</code> to be imported;
-      other fields may be left blank. <code>DOCKET NO.</code> can be alphanumeric (e.g. <code>DJL/2026-07</code>).
-      <code>STORECODE</code> can be numeric or alphanumeric (e.g. <code>101</code> or <code>JK-101</code>).
-      <code>NO OF BOX</code> can be numeric or alphanumeric (e.g. <code>2</code> or <code>2 Cartons</code>).
-      If your file has a title row above the headers (e.g. a report heading), that's fine — the header row is detected automatically.
+      <code>DATE</code> &nbsp; <code>STORECODE</code> &nbsp; <code>DOCKET NO.</code> &nbsp; <code>STORE OWNER</code> &nbsp; <code>NO OF BOX</code> &nbsp; <code>MOBILE NUMBER</code> &nbsp; <code>COURIER NAME</code><br>
+      Every row needs at least one of <code>DOCKET NO.</code>, <code>MOBILE NUMBER</code> or <code>STORECODE</code> to be imported.
+      Re-uploading the same <code>DOCKET NO.</code> + <code>MOBILE NUMBER</code> combination updates the existing row.
+      If your file has a title row above the headers, that's fine — the header row is detected automatically.
     </div>
   </div>
 

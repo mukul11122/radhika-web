@@ -251,7 +251,8 @@ const DOCKET_FIELD_ALIASES = {
   status: ['status', 'dispatch status', 'current status', 'delivery status'],
   dispatch_date: ['date', 'dispatch date', 'dispatched on', 'ship date', 'dispatch dt'],
   organization: ['organization', 'org', 'storecode', 'store code', 'kendra', 'kendra name', 'customer', 'customer name', 'party', 'party name'],
-  items: ['items', 'item details', 'description', 'contents', 'product', 'products', 'details', 'remarks']
+  items: ['items', 'item details', 'description', 'contents', 'product', 'products', 'details', 'remarks'],
+  boxes: ['boxes', 'no of box', 'no of boxes', 'no. of box', 'no. of boxes', 'box count', 'boxes count', 'packets', 'packet count', 'cartons']
 };
 
 function mapDocketRow(headers, row) {
@@ -280,7 +281,8 @@ function mapDocketRow(headers, row) {
     status: get('status'),
     dispatch_date: get('dispatch_date'),
     organization: get('organization'),
-    items: get('items')
+    items: get('items'),
+    boxes: get('boxes')
   };
 }
 

@@ -252,7 +252,8 @@ const DOCKET_FIELD_ALIASES = {
   dispatch_date: ['date', 'dispatch date', 'dispatched on', 'ship date', 'dispatch dt'],
   organization: ['organization', 'org', 'storecode', 'store code', 'kendra', 'kendra name', 'customer', 'customer name', 'party', 'party name'],
   items: ['items', 'item details', 'description', 'contents', 'product', 'products', 'details', 'remarks'],
-  boxes: ['boxes', 'no of box', 'no of boxes', 'no. of box', 'no. of boxes', 'box count', 'boxes count', 'packets', 'packet count', 'cartons']
+  boxes: ['boxes', 'no of box', 'no of boxes', 'no. of box', 'no. of boxes', 'box count', 'boxes count', 'packets', 'packet count', 'cartons'],
+  store_owner: ['store owner', 'store owner name', 'owner', 'owner name', 'kendra owner', 'shop owner', 'proprietor', 'receiver', 'receiver name']
 };
 
 function mapDocketRow(headers, row) {
@@ -282,7 +283,8 @@ function mapDocketRow(headers, row) {
     dispatch_date: get('dispatch_date'),
     organization: get('organization'),
     items: get('items'),
-    boxes: get('boxes')
+    boxes: get('boxes'),
+    store_owner: get('store_owner')
   };
 }
 

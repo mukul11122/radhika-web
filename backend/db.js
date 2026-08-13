@@ -2,7 +2,7 @@ const path = require('path');
 
 const TABLE = 'submissions';
 const DOCKET_TABLE = 'dockets';
-const DOCKET_COLS = ['mobile', 'docket_no', 'courier', 'tracking', 'status', 'dispatch_date', 'organization', 'items', 'boxes'];
+const DOCKET_COLS = ['mobile', 'docket_no', 'courier', 'tracking', 'status', 'dispatch_date', 'organization', 'items', 'boxes', 'store_owner'];
 
 // Normalize a phone number to its last 10 digits (handles +91, 0 prefix, spaces, dashes)
 function normalizePhone(input) {
@@ -68,23 +68,23 @@ async function initDockets() {
     await mysqlPool.query(`CREATE TABLE IF NOT EXISTS ${DOCKET_TABLE} (
       id INT PRIMARY KEY AUTO_INCREMENT,
       mobile TEXT, docket_no TEXT, courier TEXT, tracking TEXT,
-      status TEXT, dispatch_date TEXT, organization TEXT, items TEXT, boxes TEXT
+      status TEXT, dispatch_date TEXT, organization TEXT, items TEXT, boxes TEXT, store_owner TEXT
     )`);
-    // Migrate pre-existing tables that lack the boxes column
-    try {
-      await mysqlPool.query(`ALTER TABLE ${DOCKET_TABLE} ADD COLUMN boxes TEXT`);
-    } catch (e) {
-      if (!/duplicate column/i.test(e.message)) throw e;
-    }
   } else {
     sqliteDb.exec(`CREATE TABLE IF NOT EXISTS ${DOCKET_TABLE} (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       mobile TEXT, docket_no TEXT, courier TEXT, tracking TEXT,
-      status TEXT, dispatch_date TEXT, organization TEXT, items TEXT, boxes TEXT
+      status TEXT, dispatch_date TEXT, organization TEXT, items TEXT, boxes TEXT, store_owner TEXT
     )`);
-    // Migrate pre-existing tables that lack the boxes column
+  }
+  // Migrate pre-existing tables that lack newer columns
+  for (const col of ['boxes', 'store_owner']) {
     try {
-      sqliteDb.exec(`ALTER TABLE ${DOCKET_TABLE} ADD COLUMN boxes TEXT`);
+      if (mode === 'mysql') {
+        await mysqlPool.query(`ALTER TABLE ${DOCKET_TABLE} ADD COLUMN ${col} TEXT`);
+      } else {
+        sqliteDb.exec(`ALTER TABLE ${DOCKET_TABLE} ADD COLUMN ${col} TEXT`);
+      }
     } catch (e) {
       if (!/duplicate column/i.test(e.message)) throw e;
     }
@@ -150,7 +150,8 @@ async function upsertDocket(data) {
     dispatch_date: String(data.dispatch_date || '').trim(),
     organization: String(data.organization || '').trim(),
     items: String(data.items || '').trim(),
-    boxes: String(data.boxes || '').trim()
+    boxes: String(data.boxes || '').trim(),
+    store_owner: String(data.store_owner || '').trim()
   };
   if (mode === 'mysql') {
     const [rows] = await mysqlPool.query(
@@ -159,8 +160,8 @@ async function upsertDocket(data) {
     );
     if (rows.length) {
       await mysqlPool.query(
-        `UPDATE ${DOCKET_TABLE} SET courier=?, tracking=?, status=?, dispatch_date=?, organization=?, items=?, boxes=? WHERE id=?`,
-        [values.courier, values.tracking, values.status, values.dispatch_date, values.organization, values.items, values.boxes, rows[0].id]
+        `UPDATE ${DOCKET_TABLE} SET courier=?, tracking=?, status=?, dispatch_date=?, organization=?, items=?, boxes=?, store_owner=? WHERE id=?`,
+        [values.courier, values.tracking, values.status, values.dispatch_date, values.organization, values.items, values.boxes, values.store_owner, rows[0].id]
       );
       return rows[0].id;
     }
@@ -174,9 +175,9 @@ async function upsertDocket(data) {
   const existing = find.get(mobile, key);
   if (existing) {
     const stmt = sqliteDb.prepare(
-      `UPDATE ${DOCKET_TABLE} SET courier=?, tracking=?, status=?, dispatch_date=?, organization=?, items=?, boxes=? WHERE id=?`
+      `UPDATE ${DOCKET_TABLE} SET courier=?, tracking=?, status=?, dispatch_date=?, organization=?, items=?, boxes=?, store_owner=? WHERE id=?`
     );
-    stmt.run(values.courier, values.tracking, values.status, values.dispatch_date, values.organization, values.items, values.boxes, existing.id);
+    stmt.run(values.courier, values.tracking, values.status, values.dispatch_date, values.organization, values.items, values.boxes, values.store_owner, existing.id);
     return existing.id;
   }
   const stmt = sqliteDb.prepare(`INSERT INTO ${DOCKET_TABLE} (${DOCKET_COLS.join(',')}) VALUES (${DOCKET_COLS.map(() => '?').join(',')})`);
@@ -201,6 +202,7 @@ async function getDocketsByPhone(rawPhone) {
   }
   return rows.map(r => ({
     mobile: r.mobile, docketNo: r.docket_no, courier: r.courier, tracking: r.tracking,
-    status: r.status, dispatchDate: r.dispatch_date, organization: r.organization, items: r.items, boxes: r.boxes
+    status: r.status, dispatchDate: r.dispatch_date, organization: r.organization, items: r.items,
+    boxes: r.boxes, storeOwner: r.store_owner
   }));
 }

@@ -23,6 +23,7 @@ function docketCard(d) {
   add('Status', d.status);
   add('Dispatch Date', d.dispatchDate);
   add('Organization / Kendra', d.organization);
+  add('Store Owner', d.storeOwner);
   add('No. of Boxes', d.boxes);
   add('Items', d.items);
   return '<div class="docket-card ' + statusClass(d.status) + '">' + rows + '</div>';

@@ -21,8 +21,15 @@ function docketCard(d) {
   }
   var dno = String(d.docketNo || '');
   if (dno.indexOf('MOB-') !== 0 && dno.indexOf('STORE-') !== 0) add('Docket / Invoice No.', dno);
-  var courierLink = /^xp\s*india$/i.test(String(d.courier || '').trim())
-    ? 'https://tracking.xpindia.in/track-order#/Homepage' : null;
+  var courierLinks = {
+    XPINDIA: 'https://tracking.xpindia.in/track-order#/Homepage',
+    DELHIVERY: 'https://www.delhivery.com/',
+    DTDCEXPRESSLTD: 'https://www.dtdc.com/track-your-shipment/',
+    BLUEDART: 'https://www.bluedart.com/'
+  };
+  var courierKey = String(d.courier || '').toUpperCase().replace(/\s+/g, '');
+  var courierLink = Object.prototype.hasOwnProperty.call(courierLinks, courierKey)
+    ? courierLinks[courierKey] : null;
   add('Courier', d.courier, courierLink);
   add('Tracking / AWB No.', d.tracking);
   add('Status', d.status);

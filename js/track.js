@@ -14,12 +14,16 @@ function statusClass(status) {
 
 function docketCard(d) {
   var rows = '';
-  function add(label, val) {
-    if (val) rows += '<div class="drow"><span class="dlabel">' + esc(label) + '</span><span class="dval">' + esc(val) + '</span></div>';
+  function add(label, val, href) {
+    var value = esc(val);
+    if (href) value = '<a href="' + esc(href) + '" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">' + value + '</a>';
+    if (val) rows += '<div class="drow"><span class="dlabel">' + esc(label) + '</span><span class="dval">' + value + '</span></div>';
   }
   var dno = String(d.docketNo || '');
   if (dno.indexOf('MOB-') !== 0 && dno.indexOf('STORE-') !== 0) add('Docket / Invoice No.', dno);
-  add('Courier', d.courier);
+  var courierLink = /^xp\s*india$/i.test(String(d.courier || '').trim())
+    ? 'https://tracking.xpindia.in/track-order#/Homepage' : null;
+  add('Courier', d.courier, courierLink);
   add('Tracking / AWB No.', d.tracking);
   add('Status', d.status);
   add('Dispatch Date', d.dispatchDate);

@@ -107,23 +107,19 @@ document.getElementById('uploadForm').addEventListener('submit',async(e)=>{
   const msg=document.getElementById('uploadMsg');
   const file=fileInput.files[0];
   if(!file){ msg.className='msg err'; msg.textContent='Please choose an Excel file.'; return; }
-  msg.className='msg'; msg.textContent='Reading file...';
-  const reader=new FileReader();
-  reader.onload=async()=>{
-    try{
-      const body={ filename:file.name, data:reader.result };
-      const res=await fetch('/api/courier/dockets/upload',{
-        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
-        body:JSON.stringify(body)
-      });
-      const out=await res.json();
-      if(res.status===401){ localStorage.removeItem(TOKEN_KEY); showLogin(); return; }
-      if(out.ok){ msg.className='msg ok'; msg.textContent='✅ '+out.message; e.target.reset(); }
-      else { msg.className='msg err'; msg.textContent='❌ '+out.message; }
-    }catch(err){ msg.className='msg err'; msg.textContent='❌ Network error'; }
-  };
-  reader.onerror=()=>{ msg.className='msg err'; msg.textContent='❌ Could not read file'; };
-  reader.readAsDataURL(file);
+  msg.className='msg'; msg.textContent='Uploading...';
+  try{
+    const fd=new FormData();
+    fd.append('file', file);
+    const res=await fetch('/api/courier/dockets/upload',{
+      method:'POST',headers:{'Authorization':'Bearer '+getToken()},
+      body:fd
+    });
+    const out=await res.json();
+    if(res.status===401){ localStorage.removeItem(TOKEN_KEY); showLogin(); return; }
+    if(out.ok){ msg.className='msg ok'; msg.textContent='✅ '+out.message; e.target.reset(); }
+    else { msg.className='msg err'; msg.textContent='❌ '+out.message; }
+  }catch(err){ msg.className='msg err'; msg.textContent='❌ Network error'; }
 });
 
 if(getToken()){ showPanel(); }

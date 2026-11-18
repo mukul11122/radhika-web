@@ -74,8 +74,8 @@ app.use((req, res, next) => {
 // --- SEO: canonical redirects ---
 // 1. Redirect non-www to www (301)
 app.use((req, res, next) => {
-  if (req.hostname === 'radhikagencies.com') {
-    return res.redirect(301, `https://www.radhikagencies.com${req.url}`);
+  if (req.hostname === 'radhikaagencies.com' || req.hostname === 'radhikagencies.com') {
+    return res.redirect(301, `https://www.radhikaagencies.com${req.url}`);
   }
   next();
 });
@@ -332,6 +332,39 @@ function mapDocketRow(headers, row) {
   };
 }
 
+// ---------- Courier official tracking URLs ----------
+// The 'courier' column in the docket sheet can be typed many ways, so we match
+// by any distinctive substring and return that courier's official tracking site.
+// The customer opens it with their AWB number to see live progress.
+const COURIER_TRACKING = [
+  { keys: ['delhivery'], url: 'https://www.delhivery.com/tracking' },
+  { keys: ['blue dart', 'bluedart', 'blue-dart', 'bluedart xpress'], url: 'https://www.bluedart.com/tracking' },
+  { keys: ['dtdc', 'desk to desk'], url: 'https://www.dtdc.com/track-your-shipment/' },
+  { keys: ['india post', 'speed post', 'speedpost', 'postal', 'ems'], url: 'https://www.indiapost.gov.in/VAS/Pages/TrackConsignment.aspx' },
+  { keys: ['ekart', 'e-kart', 'flipkart'], url: 'https://www.ekartlogistics.in/track-order' },
+  { keys: ['xpressbees', 'xpress bees', 'xpressbees xpress'], url: 'https://www.xpressbees.com/shipment/tracking' },
+  { keys: ['trackon'], url: 'https://www.trackontrack.com/TrackParcel' },
+  { keys: ['safexpress', 'safe express'], url: 'https://www.safexpress.com/Track-Your-Shipment' },
+  { keys: ['gati'], url: 'https://www.gati.com/tracking' },
+  { keys: ['shadowfax'], url: 'https://www.shadowfax.in/tracking' },
+  { keys: ['ols'], url: 'https://www.olslogistics.in/tracking' },
+  { keys: ['baluni'], url: 'https://trk.ecount.in/lr/baluni' },
+  { keys: ['xp india', 'xpindia'], url: 'https://tracking.xpindia.in/track-order' }
+];
+
+// Return the courier's official tracking URL, or '' when there is no tracking number
+// or the courier name is not one we recognise.
+function courierTrackUrl(courier, tracking) {
+  const trackingNo = String(tracking || '').trim();
+  if (!trackingNo) return '';
+  const name = String(courier || '').toLowerCase().trim();
+  if (!name) return '';
+  for (const c of COURIER_TRACKING) {
+    if (c.keys.some(k => name.includes(k))) return c.url;
+  }
+  return '';
+}
+
 // Courier: upload dockets via Excel (base64) — protected
 app.post('/api/courier/dockets/upload', authCourier, async (req, res) => {
   try {
@@ -435,7 +468,10 @@ app.get('/api/docket', async (req, res) => {
       }
       dockets = await db.getDocketsByStore(store);
     }
-    res.json({ ok: true, found: dockets.length > 0, dockets });
+    res.json({ ok: true, found: dockets.length > 0, dockets: dockets.map(d => ({
+      ...d,
+      trackUrl: courierTrackUrl(d.courier, d.tracking)
+    })) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, message: 'Server error. Please try again.' });

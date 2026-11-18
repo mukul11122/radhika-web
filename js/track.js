@@ -32,6 +32,9 @@ function docketCard(d) {
     ? courierLinks[courierKey] : null;
   add('Courier', d.courier, courierLink);
   add('Tracking / AWB No.', d.tracking);
+  if (d.trackUrl) {
+    rows += '<div class="drow"><span class="dlabel">Live Tracking</span><span class="dval"><a class="btn btn-primary" style="display:inline-block;padding:6px 14px" href="' + esc(d.trackUrl) + '" target="_blank" rel="noopener">Track Here on ' + esc(d.courier) + '</a></span></div>';
+  }
   add('Status', d.status);
   add('Dispatch Date', d.dispatchDate);
   add('Organization / Kendra', d.organization);

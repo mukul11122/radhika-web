@@ -7,3 +7,6 @@ test*.xlsx
 .tunnel.*
 backend/server.err
 
+.vercel
+
+.freebuff/

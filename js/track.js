@@ -7,91 +7,162 @@ function esc(s) {
 function statusClass(status) {
   var s = String(status || '').toLowerCase();
   if (s.indexOf('deliver') >= 0) return 'ok';
-  if (s.indexOf('transit') >= 0 || s.indexOf('dispatch') >= 0 || s.indexOf('ship') >= 0) return 'warn';
+  if (s.indexOf('transit') >= 0 || s.indexOf('dispatch') >= 0 || s.indexOf('ship') >= 0)
+    return 'warn';
   if (s.indexOf('cancel') >= 0 || s.indexOf('return') >= 0) return 'err';
   return '';
 }
 
+function dispatchTime(value) {
+  var text = String(value || '').trim(),
+    m = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (m) return Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+  if (/^\d{4}-\d{2}-\d{2}/.test(text)) {
+    var time = Date.parse(text);
+    return isNaN(time) ? -Infinity : time;
+  }
+  return -Infinity;
+}
 function docketCard(d) {
   var rows = '';
   function add(label, val, href) {
     var value = esc(val);
-    if (href) value = '<a href="' + esc(href) + '" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">' + value + '</a>';
-    if (val) rows += '<div class="drow"><span class="dlabel">' + esc(label) + '</span><span class="dval">' + value + '</span></div>';
+    if (href)
+      value =
+        '<a href="' +
+        esc(href) +
+        '" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">' +
+        value +
+        '</a>';
+    if (val)
+      rows +=
+        '<div class="drow"><span class="dlabel">' +
+        esc(label) +
+        '</span><span class="dval">' +
+        value +
+        '</span></div>';
   }
   var dno = String(d.docketNo || '');
-  if (dno.indexOf('MOB-') !== 0 && dno.indexOf('STORE-') !== 0) add('Docket / Invoice No.', dno);
+  var title = dno.indexOf('MOB-') !== 0 && dno.indexOf('STORE-') !== 0 ? dno : 'Dispatch details';
   var courierLinks = {
     XPINDIA: 'https://tracking.xpindia.in/track-order#/Homepage',
     DELHIVERY: 'https://www.delhivery.com/',
     DTDCEXPRESSLTD: 'https://www.dtdc.com/track-your-shipment/',
-    BLUEDART: 'https://www.bluedart.com/'
+    BLUEDART: 'https://www.bluedart.com/',
+    OLSLOGISTICS: 'https://www.olslogistics.in/tracking',
   };
-  var courierKey = String(d.courier || '').toUpperCase().replace(/\s+/g, '');
+  var courierKey = String(d.courier || '')
+    .toUpperCase()
+    .replace(/\s+/g, '');
   var courierLink = Object.prototype.hasOwnProperty.call(courierLinks, courierKey)
-    ? courierLinks[courierKey] : null;
+    ? courierLinks[courierKey]
+    : null;
   add('Courier', d.courier, courierLink);
   add('Tracking / AWB No.', d.tracking);
   if (d.trackUrl) {
-    rows += '<div class="drow"><span class="dlabel">Live Tracking</span><span class="dval"><a class="btn btn-primary" style="display:inline-block;padding:6px 14px" href="' + esc(d.trackUrl) + '" target="_blank" rel="noopener">Track Here on ' + esc(d.courier) + '</a></span></div>';
+    rows +=
+      '<div class="drow"><span class="dlabel">Live Tracking</span><span class="dval"><a class="btn btn-primary" style="display:inline-block;padding:6px 14px" href="' +
+      esc(d.trackUrl) +
+      '" target="_blank" rel="noopener">Track Here on ' +
+      esc(d.courier) +
+      '</a></span></div>';
   }
   add('Status', d.status);
-  add('Dispatch Date', d.dispatchDate);
+
   add('Organization / Kendra', d.organization);
   add('Store Owner', d.storeOwner);
   add('No. of Boxes', d.boxes);
   add('Items', d.items);
-  return '<div class="docket-card ' + statusClass(d.status) + '">' + rows + '</div>';
+  return (
+    '<article class="docket-card ' +
+    statusClass(d.status) +
+    '"><div class="docket-tile-heading"><div><span class="docket-caption">Docket / Invoice No.</span><h4>' +
+    esc(title) +
+    '</h4></div><div class="dispatch-badge"><span>Dispatch Date</span><strong>' +
+    esc(d.dispatchDate || 'Unavailable') +
+    '</strong></div></div>' +
+    rows +
+    '</article>'
+  );
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  var form = document.getElementById("trackForm");
+document.addEventListener('DOMContentLoaded', function () {
+  var form = document.getElementById('trackForm');
   if (!form) return;
-  var msg = form.querySelector(".msg");
-  var results = document.getElementById("results");
+  var msg = form.querySelector('.msg');
+  var results = document.getElementById('results');
 
-  form.addEventListener("submit", function (e) {
+  form.addEventListener('submit', function (e) {
     e.preventDefault();
-    var phone = document.getElementById("phone").value.trim();
-    var store = document.getElementById("store").value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var store = document.getElementById('store').value.trim();
     if (!phone && !store) {
-      msg.className = "msg err"; msg.style.display = "block";
-      msg.textContent = "Please enter a mobile number or store code.";
+      msg.className = 'msg err';
+      msg.style.display = 'block';
+      msg.textContent = 'Please enter a mobile number or store code.';
       return;
     }
-    msg.style.display = "none";
+    msg.style.display = 'none';
     results.innerHTML = '<p class="note">Looking up your dockets…</p>';
-    var btn = form.querySelector("button[type=submit]");
-    var label = btn ? btn.textContent : "";
-    if (btn) { btn.disabled = true; btn.textContent = "Tracking…"; }
+    var btn = form.querySelector('button[type=submit]');
+    var label = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Tracking…';
+    }
 
     var url = phone
-      ? "/api/docket?phone=" + encodeURIComponent(phone)
-      : "/api/docket?store=" + encodeURIComponent(store);
+      ? '/api/docket?phone=' + encodeURIComponent(phone)
+      : '/api/docket?store=' + encodeURIComponent(store);
 
     fetch(url)
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (r) {
+        return r.json().then(function (j) {
+          return { ok: r.ok, j: j };
+        });
+      })
       .then(function (res) {
         if (!res.ok || !res.j.ok) {
-          msg.className = "msg err"; msg.style.display = "block";
-          msg.textContent = (res.j && res.j.message) || "Lookup failed. Please try again.";
-          results.innerHTML = "";
+          msg.className = 'msg err';
+          msg.style.display = 'block';
+          msg.textContent = (res.j && res.j.message) || 'Lookup failed. Please try again.';
+          results.innerHTML = '';
           return;
         }
         if (!res.j.found) {
-          results.innerHTML = '<div class="msg err" style="display:block;max-width:640px;margin:0 auto">No docket found for this number yet. If your order was dispatched recently, please allow some time or contact us.</div>';
+          results.innerHTML =
+            '<div class="msg err" style="display:block;max-width:640px;margin:0 auto">No docket found for this number yet. If your order was dispatched recently, please allow some time or contact us.</div>';
           return;
         }
-        results.innerHTML = '<h3 style="text-align:center;margin-bottom:18px">Found ' + res.j.dockets.length + ' docket(s)</h3>' +
-          res.j.dockets.map(docketCard).join('');
+        var dockets = res.j.dockets.slice().sort(function (a, b) {
+          var x = dispatchTime(a.dispatchDate),
+            y = dispatchTime(b.dispatchDate);
+          return x === y ? 0 : x > y ? -1 : 1;
+        });
+        results.innerHTML =
+          '<div class="docket-results-heading"><h3>Found ' +
+          dockets.length +
+          ' docket(s)</h3><span>Latest dispatch first</span></div><div class="docket-grid">' +
+          dockets.map(docketCard).join('') +
+          '</div>';
       })
       .catch(function () {
-        msg.className = "msg err"; msg.style.display = "block";
-        msg.textContent = "Network error. Is the server running?";
-        results.innerHTML = "";
+        msg.className = 'msg err';
+        msg.style.display = 'block';
+        msg.textContent = 'Network error. Is the server running?';
+        results.innerHTML = '';
       })
       .finally(function () {
-        if (btn) { btn.disabled = false; btn.textContent = label; }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = label;
+        }
       });
   });
+});
+
+// Prefill tracking from an order card without submitting the form.
+document.addEventListener('DOMContentLoaded', function () {
+  var store = new URLSearchParams(location.search).get('store') || '';
+  if (/^[0-9]{1,40}$/.test(store)) document.getElementById('store').value = store;
 });

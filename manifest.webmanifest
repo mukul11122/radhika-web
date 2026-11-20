@@ -1,0 +1,44 @@
+{
+  "id": "/",
+  "name": "Radhika Agencies",
+  "short_name": "Radhika",
+  "description": "Medicines, live stock and docket tracking from Radhika Agencies, Dehradun.",
+  "lang": "en-IN",
+  "start_url": "/index.html?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e4fd6",
+  "icons": [
+    {
+      "src": "/assets/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Live Stock",
+      "url": "/stock.html",
+      "icons": [{ "src": "/assets/pwa/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Track Docket",
+      "url": "/track.html",
+      "icons": [{ "src": "/assets/pwa/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

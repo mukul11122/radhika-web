@@ -1,0 +1,8 @@
+node_modules/
+js/vendor/
+backend/
+assets/
+.vercel/
+.freebuff/
+.env*
+package-lock.json

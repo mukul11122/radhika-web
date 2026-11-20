@@ -1,9 +1,35 @@
 const TABLE = 'submissions';
 const DOCKET_TABLE = 'dockets';
-const DOCKET_COLS = ['mobile', 'docket_no', 'courier', 'tracking', 'status', 'dispatch_date', 'organization', 'items', 'boxes', 'store_owner'];
-const COLS = ['date', 'type', 'name', 'email', 'phone', 'organization', 'city', 'state', 'kendraCode', 'orderType', 'subject', 'details'];
+const DOCKET_COLS = [
+  'mobile',
+  'docket_no',
+  'courier',
+  'tracking',
+  'status',
+  'dispatch_date',
+  'organization',
+  'items',
+  'boxes',
+  'store_owner',
+];
+const COLS = [
+  'date',
+  'type',
+  'name',
+  'email',
+  'phone',
+  'organization',
+  'city',
+  'state',
+  'kendraCode',
+  'orderType',
+  'subject',
+  'details',
+];
 
-let mysqlPool = null;
+let mysqlPool = null,
+  mysqlReady = null,
+  stockReady = null;
 
 function normalizePhone(input) {
   const digits = String(input || '').replace(/\D/g, '');
@@ -14,7 +40,17 @@ function normalizePhone(input) {
 }
 
 async function getPool() {
-  if (mysqlPool) return mysqlPool;
+  if (!mysqlReady)
+    mysqlReady = initializePool().catch(async (error) => {
+      const failed = mysqlPool;
+      mysqlPool = null;
+      mysqlReady = null;
+      if (failed) await failed.end().catch(() => {});
+      throw error;
+    });
+  return mysqlReady;
+}
+async function initializePool() {
   const mysql = require('mysql2/promise');
   mysqlPool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -24,7 +60,7 @@ async function getPool() {
     database: process.env.DB_NAME || 'defaultdb',
     waitForConnections: true,
     connectionLimit: 5,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
   });
   await mysqlPool.query(`CREATE TABLE IF NOT EXISTS ${TABLE} (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -38,9 +74,15 @@ async function getPool() {
     status TEXT, dispatch_date TEXT, organization TEXT, items TEXT, boxes TEXT, store_owner TEXT
   )`);
   for (const col of ['boxes', 'store_owner']) {
-    try { await mysqlPool.query(`ALTER TABLE ${DOCKET_TABLE} ADD COLUMN ${col} TEXT`); }
-    catch (e) { if (!/duplicate column/i.test(e.message)) throw e; }
+    try {
+      await mysqlPool.query(`ALTER TABLE ${DOCKET_TABLE} ADD COLUMN ${col} TEXT`);
+    } catch (e) {
+      if (!/duplicate column/i.test(e.message)) throw e;
+    }
   }
+  await require('../lib/performance-store').setup(mysqlPool);
+  await require('../lib/operations').setup(mysqlPool);
+  await require('../lib/kendra').setup(mysqlPool);
   return mysqlPool;
 }
 
@@ -52,7 +94,7 @@ async function ping() {
 
 async function insertSubmission(data) {
   const pool = await getPool();
-  const values = COLS.map(c => (data[c] !== undefined ? data[c] : ''));
+  const values = COLS.map((c) => (data[c] !== undefined ? data[c] : ''));
   const [res] = await pool.query(
     `INSERT INTO ${TABLE} (${COLS.join(',')}) VALUES (${COLS.map(() => '?').join(',')})`,
     values
@@ -63,10 +105,20 @@ async function insertSubmission(data) {
 async function getSubmissions() {
   const pool = await getPool();
   const [rows] = await pool.query(`SELECT * FROM ${TABLE} ORDER BY id DESC`);
-  return rows.map(r => ({
-    id: r.id, date: r.date, type: r.type, name: r.name, email: r.email,
-    phone: r.phone, organization: r.organization, city: r.city, state: r.state,
-    kendraCode: r.kendraCode, orderType: r.orderType, subject: r.subject, details: r.details
+  return rows.map((r) => ({
+    id: r.id,
+    date: r.date,
+    type: r.type,
+    name: r.name,
+    email: r.email,
+    phone: r.phone,
+    organization: r.organization,
+    city: r.city,
+    state: r.state,
+    kendraCode: r.kendraCode,
+    orderType: r.orderType,
+    subject: r.subject,
+    details: r.details,
   }));
 }
 
@@ -75,10 +127,17 @@ async function upsertDocket(data, rowKey) {
   const mobile = normalizePhone(data.mobile);
   const docketNo = String(data.docket_no || '').trim();
   const storeCode = String(data.organization || '').trim();
-  const key = docketNo || (mobile ? ('MOB-' + mobile) : (storeCode ? ('STORE-' + storeCode.toLowerCase() + (rowKey ? '-' + rowKey : '')) : ''));
+  const key =
+    docketNo ||
+    (mobile
+      ? 'MOB-' + mobile
+      : storeCode
+        ? 'STORE-' + storeCode.toLowerCase() + (rowKey ? '-' + rowKey : '')
+        : '');
   if (!mobile && !docketNo && !storeCode) return null;
   const values = {
-    mobile, docket_no: key,
+    mobile,
+    docket_no: key,
     courier: String(data.courier || '').trim(),
     tracking: String(data.tracking || '').trim(),
     status: String(data.status || '').trim(),
@@ -86,28 +145,48 @@ async function upsertDocket(data, rowKey) {
     organization: String(data.organization || '').trim(),
     items: String(data.items || '').trim(),
     boxes: String(data.boxes || '').trim(),
-    store_owner: String(data.store_owner || '').trim()
+    store_owner: String(data.store_owner || '').trim(),
   };
-  const [rows] = await pool.query(`SELECT id FROM ${DOCKET_TABLE} WHERE mobile=? AND docket_no=?`, [mobile, key]);
+  const [rows] = await pool.query(`SELECT id FROM ${DOCKET_TABLE} WHERE mobile=? AND docket_no=?`, [
+    mobile,
+    key,
+  ]);
   if (rows.length) {
     await pool.query(
       `UPDATE ${DOCKET_TABLE} SET courier=?, tracking=?, status=?, dispatch_date=?, organization=?, items=?, boxes=?, store_owner=? WHERE id=?`,
-      [values.courier, values.tracking, values.status, values.dispatch_date, values.organization, values.items, values.boxes, values.store_owner, rows[0].id]
+      [
+        values.courier,
+        values.tracking,
+        values.status,
+        values.dispatch_date,
+        values.organization,
+        values.items,
+        values.boxes,
+        values.store_owner,
+        rows[0].id,
+      ]
     );
     return rows[0].id;
   }
   const [res] = await pool.query(
     `INSERT INTO ${DOCKET_TABLE} (${DOCKET_COLS.join(',')}) VALUES (${DOCKET_COLS.map(() => '?').join(',')})`,
-    DOCKET_COLS.map(c => values[c])
+    DOCKET_COLS.map((c) => values[c])
   );
   return res.insertId;
 }
 
 function toDocket(r) {
   return {
-    mobile: r.mobile, docketNo: r.docket_no, courier: r.courier, tracking: r.tracking,
-    status: r.status, dispatchDate: r.dispatch_date, organization: r.organization, items: r.items,
-    boxes: r.boxes, storeOwner: r.store_owner
+    mobile: r.mobile,
+    docketNo: r.docket_no,
+    courier: r.courier,
+    tracking: r.tracking,
+    status: r.status,
+    dispatchDate: r.dispatch_date,
+    organization: r.organization,
+    items: r.items,
+    boxes: r.boxes,
+    storeOwner: r.store_owner,
   };
 }
 
@@ -124,7 +203,9 @@ async function getDocketsByPhone(rawPhone) {
 
 async function getDocketsByStore(rawStore) {
   const pool = await getPool();
-  const store = String(rawStore || '').trim().toLowerCase();
+  const store = String(rawStore || '')
+    .trim()
+    .toLowerCase();
   if (!store) return [];
   const [rows] = await pool.query(
     `SELECT ${DOCKET_COLS.join(',')} FROM ${DOCKET_TABLE} WHERE LOWER(organization)=? ORDER BY id DESC`,
@@ -133,4 +214,79 @@ async function getDocketsByStore(rawStore) {
   return rows.map(toDocket);
 }
 
-module.exports = { getPool, ping, insertSubmission, getSubmissions, normalizePhone, upsertDocket, getDocketsByPhone, getDocketsByStore };
+async function stockTable() {
+  const pool = await getPool();
+  if (!stockReady)
+    stockReady = pool
+      .query(
+        'CREATE TABLE IF NOT EXISTS stock_snapshot (id INT PRIMARY KEY, payload LONGTEXT NOT NULL)'
+      )
+      .catch((error) => {
+        stockReady = null;
+        throw error;
+      });
+  await stockReady;
+  return pool;
+}
+async function getStock() {
+  const pool = await stockTable();
+  const [rows] = await pool.query('SELECT payload FROM stock_snapshot WHERE id=1');
+  return rows.length ? JSON.parse(rows[0].payload) : { items: [], updatedAt: null, version: null };
+}
+async function replaceStock(items) {
+  const pool = await stockTable();
+  const snapshot = {
+    items,
+    updatedAt: new Date().toISOString(),
+    version: require('crypto').randomUUID(),
+  };
+  const c = await pool.getConnection();
+  try {
+    await c.beginTransaction();
+    await c.query(
+      'INSERT INTO stock_snapshot (id,payload) VALUES (1,?) ON DUPLICATE KEY UPDATE payload=VALUES(payload)',
+      [JSON.stringify(snapshot)]
+    );
+    await syncStockRows(c, snapshot);
+    await c.commit();
+  } catch (e) {
+    await c.rollback();
+    throw e;
+  } finally {
+    c.release();
+  }
+  return snapshot;
+}
+async function syncStockRows(connection, snapshot, previous) {
+  return require('../lib/performance-store').sync(connection, snapshot, previous);
+}
+async function getStockAlerts(query) {
+  const pool = await stockTable();
+  return require('../lib/performance-store').alerts(pool, query);
+}
+async function dashboardCached(compute) {
+  return require('../lib/performance-store').cachedDashboard(await getPool(), compute);
+}
+async function recordAudit(connection, actor, details) {
+  await connection.query(
+    'INSERT INTO order_event_details (event_id,actor,details) SELECT LAST_INSERT_ID(),?,?',
+    [actor, JSON.stringify(details)]
+  );
+}
+module.exports = {
+  recordAudit,
+  optimizedOrders: true,
+  syncStockRows,
+  getStockAlerts,
+  dashboardCached,
+  getPool,
+  ping,
+  insertSubmission,
+  getSubmissions,
+  normalizePhone,
+  upsertDocket,
+  getDocketsByPhone,
+  getDocketsByStore,
+  getStock,
+  replaceStock,
+};

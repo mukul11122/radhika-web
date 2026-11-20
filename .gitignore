@@ -10,3 +10,9 @@ backend/server.err
 .vercel
 
 .freebuff/
+
+.vercel/
+.freebuff/
+.env*
+*.err
+*.zip

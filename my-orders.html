@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>My Orders — Radhika Agencies</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/admin-orders.css" />
+    <link rel="stylesheet" href="css/my-orders.css" />
+  </head>
+  <body class="history-page">
+    <main class="history-shell">
+      <nav class="history-topbar" aria-label="Page navigation">
+        <a class="history-brand" href="index.html"
+          ><span class="history-monogram" aria-hidden="true">RA<span>+</span></span
+          ><span>Radhika Agencies<small>Authorised Jan Aushadhi Distributor</small></span></a
+        ><a class="history-back" href="stock.html">← Back to stock</a>
+      </nav>
+      <header class="history-hero">
+        <div>
+          <p class="history-eyebrow"><span></span> YOUR ORDER DESK</p>
+          <h1>My orders<span>.</span></h1>
+          <p>Past orders. Clear updates. A simpler next order.</p>
+        </div>
+        <div class="history-hero-note">
+          <span aria-hidden="true">↻</span>
+          <div>
+            <strong>Your next order starts here</strong>
+            <p>Repeat a previous list with the latest stock and rates.</p>
+          </div>
+        </div>
+      </header>
+      <div class="history-layout">
+        <aside class="history-sidebar">
+          <section class="history-search-card" aria-labelledby="find-orders-title">
+            <div class="history-section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                <circle cx="10.5" cy="10.5" r="6.5" />
+                <path d="m16 16 4.5 4.5" />
+              </svg>
+            </div>
+            <h2 id="find-orders-title">Find your orders</h2>
+            <p class="history-search-intro">
+              Enter <strong>either one</strong> of the details used when ordering.
+            </p>
+            <form id="history-form">
+              <label for="history-store"
+                >Store Code<input
+                  id="history-store"
+                  maxlength="40"
+                  pattern="[A-Za-z0-9-]+"
+                  placeholder="e.g. 2551"
+                  autocomplete="off"
+              /></label>
+              <div class="history-or"><span>OR</span></div>
+              <label for="history-mobile"
+                >Order mobile number<input
+                  id="history-mobile"
+                  type="tel"
+                  pattern="[0-9]{10}"
+                  maxlength="10"
+                  inputmode="numeric"
+                  placeholder="10-digit mobile number"
+                  autocomplete="tel-national" /></label
+              ><button id="history-load" class="history-primary" type="submit">
+                View my orders <span aria-hidden="true">→</span></button
+              ><button class="history-clear" type="reset">Clear search</button>
+            </form>
+            <p id="message" role="status" aria-live="polite" hidden></p>
+          </section>
+          <div class="history-tip">
+            <span aria-hidden="true">ⓘ</span>
+            <p>
+              <strong>Planning a repeat order?</strong>We check current stock and rates. You can
+              review the list before submitting.
+            </p>
+          </div>
+        </aside>
+        <section class="history-results" aria-labelledby="history-results-title">
+          <header class="history-results-header">
+            <div>
+              <p class="history-eyebrow">YOUR ACTIVITY</p>
+              <h2 id="history-results-title">Order history</h2>
+            </div>
+            <span id="history-result-count" role="status" aria-live="polite"
+              >Ready when you are</span
+            >
+          </header>
+          <div id="history-state" class="history-state" role="status">
+            <div class="history-package" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none">
+                <path
+                  d="m12 22 20-11 20 11v23L32 56 12 45V22Z"
+                  fill="#fff"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <path
+                  d="m12 22 20 11 20-11M32 33v23M22 16l20 11v10"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="m21 41 5 3"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <h3>Your orders, all in one place</h3>
+            <p>Find previous orders using your Store Code or order mobile number.</p>
+            <div class="history-features">
+              <span>✓ View medicines</span><span>✓ Check status</span><span>↻ Repeat a list</span>
+            </div>
+          </div>
+          <div id="history-orders" aria-label="Your order history"></div>
+          <div class="history-pagination" id="history-paging" hidden>
+            <button id="previous" type="button">← Previous</button><span id="page-status"></span
+            ><button id="next" type="button">Next →</button>
+          </div>
+        </section>
+      </div>
+      <footer class="history-footer">
+        <span>Radhika Agencies · Dehradun</span
+        ><a href="stock.html">Browse available medicines →</a>
+      </footer>
+    </main>
+    <script src="js/kendra-profile.js"></script>
+    <script src="js/my-orders.js"></script>
+  </body>
+</html>

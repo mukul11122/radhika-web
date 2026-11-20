@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Admin Panel — Radhika Agencies</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/admin-orders.css" />
+    <link rel="stylesheet" href="css/operations.css" />
+  </head>
+  <body>
+    <main class="orders-shell">
+      <header class="orders-header">
+        <div>
+          <a href="stock.html">← Stock Directory</a>
+          <p class="orders-eyebrow">RADHIKA AGENCIES · ADMIN</p>
+          <h1>Admin Panel</h1>
+          <p>Manage stock uploads, orders, dashboard and stock alerts in one place.</p>
+        </div>
+        <div>
+          <button id="logout" hidden>Lock panel</button>
+        </div>
+      </header>
+      <section class="orders-login" id="login-card">
+        <h2>Admin access only</h2>
+        <p>Enter your stock-upload username and password. This panel is not for PMBI users.</p>
+        <form id="login-form">
+          <label>Username<input name="username" autocomplete="username" required /></label
+          ><label
+            >Password<input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required /></label
+          ><button class="orders-primary" id="login-button">Unlock Admin Panel</button>
+        </form>
+      </section>
+      <div id="panel" hidden>
+        <nav class="admin-tabs" aria-label="Admin sections">
+          <button type="button" data-admin-view="dashboard" aria-pressed="true">Dashboard</button
+          ><button type="button" data-admin-view="orders" aria-pressed="false">Orders</button
+          ><button type="button" data-admin-view="alerts" aria-pressed="false">Stock Alerts</button
+          ><button type="button" data-admin-view="operations" aria-pressed="false">
+            Operations &amp; Backups</button
+          ><button type="button" data-admin-view="kendras" aria-pressed="false">
+            Kendra &amp; Demand</button
+          ><button type="button" data-admin-view="stock" aria-pressed="false">Manage Stock</button
+          ><button type="button" data-admin-view="dockets" aria-pressed="false">Docket Records</button><a href="stock-upload.html">↑ Upload Stock File</a>
+        </nav>
+        <section id="admin-view-dockets" aria-label="Docket records" hidden>
+<section class="insights-card"><h2>Docket Records</h2><p>Daily records by dispatch date. Latest dispatches first.</p>
+<form id="docket-record-search" class="docket-record-filters"><label>Search<input name="q" placeholder="Store code, mobile, docket, courier or owner"></label><label>Dispatch date<select id="docket-record-date"><option value="">All dates</option></select></label><button type="submit">Search</button><button type="button" id="docket-record-refresh">Refresh</button></form>
+<p id="docket-record-message" role="status"></p><div class="docket-record-table"><table><thead><tr><th aria-sort="descending"><button type="button" data-docket-sort="dispatch_date">Dispatch date <span aria-hidden="true">↓</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="organization">Store code <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="store_owner">Owner <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="mobile">Mobile <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="docket_no">Docket / Invoice <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="courier">Courier <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="tracking">Tracking / AWB <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="status">Status <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="boxes">Boxes <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="items">Items <span aria-hidden="true">↕</span></button></th></tr></thead><tbody id="docket-record-rows"></tbody></table></div>
+<div class="docket-record-paging"><button type="button" id="docket-record-prev">← Previous</button><span id="docket-record-page"></span><button type="button" id="docket-record-next">Next →</button></div></section></section>
+<section id="admin-view-stock" aria-label="Manage uploaded stock" hidden>
+          <section class="insights-card">
+            <p class="manage-stock-eyebrow">INVENTORY CONTROL</p>
+            <h2>Manage uploaded stock</h2>
+            <p>
+              Matching DC, batch, expiry and pack size are merged with total quantity. Remove a row
+              to remove all its source records. A new stock upload can add them again.
+            </p>
+            <form id="manage-stock-search" class="alert-search-form">
+              <label
+                >Search stock<input
+                  type="search"
+                  name="q"
+                  placeholder="DC, medicine name or batch number"
+                  maxlength="100" /></label
+              ><button type="submit">Search / Refresh</button>
+            </form>
+            <p id="manage-stock-message" role="status" aria-live="polite"></p>
+            <div class="order-download">
+              <button type="button" id="manage-stock-select">Select this page</button
+              ><button type="button" id="manage-stock-remove" class="cancel-order" disabled>
+                Remove selected (0)
+              </button>
+            </div>
+            <div
+              id="manage-stock-results"
+              class="order-items"
+              tabindex="0"
+              aria-label="Uploaded stock records"
+            ></div>
+            <div class="manage-stock-footer">
+              <label class="manage-stock-page-size"
+                >Rows per page
+                <select id="manage-stock-size">
+                  <option>10</option>
+                  <option>20</option>
+                  <option>50</option>
+                  <option>100</option>
+                  <option>200</option>
+                </select></label
+              >
+              <div class="orders-paging">
+                <button type="button" id="manage-stock-previous">← Previous</button
+                ><span id="manage-stock-page"></span
+                ><button type="button" id="manage-stock-next">Next →</button>
+              </div>
+            </div>
+          </section>
+        </section>
+        <section id="admin-view-operations" aria-label="Operations and backups" hidden>
+          <header class="ops-page-heading">
+            <div>
+              <p class="ops-eyebrow"><span></span> DAILY CONTROL CENTRE</p>
+              <h2>Operations &amp; Backups</h2>
+              <p>Keep deliveries on track and your records backed up.</p>
+            </div>
+            <div class="ops-page-actions">
+              <button id="operations-refresh" type="button">
+                <span aria-hidden="true">↻</span> Refresh</button
+              ><button id="backup-create" class="ops-primary" type="button">
+                <span aria-hidden="true">＋</span> Create / verify backup
+              </button>
+            </div>
+          </header>
+          <p id="operations-message" class="ops-feedback" role="status" aria-live="polite"></p>
+          <div id="operations-content"></div>
+        </section>
+        <section id="admin-view-kendras" aria-label="Kendra profiles and demand" hidden>
+          <section class="insights-card">
+            <h2>Unavailable medicine demand</h2>
+            <form id="admin-demand-search" class="alert-search-form">
+              <label
+                >Search<input
+                  name="q"
+                  type="search"
+                  placeholder="Store Code, DC or medicine name"
+                  maxlength="100" /></label
+              ><label
+                >Status<select name="status">
+                  <option value="">All statuses</option>
+                  <option>New</option>
+                  <option>Reviewing</option>
+                  <option>Available</option>
+                  <option>Closed</option>
+                </select></label
+              ><button type="submit">Search</button>
+            </form>
+            <p id="admin-demand-message" role="status"></p>
+            <div id="admin-demands"></div>
+            <div class="orders-paging">
+              <button id="admin-demand-previous" type="button">← Previous</button
+              ><span id="admin-demand-page"></span
+              ><button id="admin-demand-next" type="button">Next →</button>
+            </div>
+          </section>
+          <section class="insights-card">
+            <h2>Saved Kendra profiles</h2>
+            <form id="admin-profile-search" class="alert-search-form">
+              <label
+                >Search profiles<input
+                  name="q"
+                  type="search"
+                  maxlength="100"
+                  placeholder="Store Code, name or mobile" /></label
+              ><button type="submit">Search</button>
+            </form>
+            <p id="admin-profile-message" role="status" aria-live="polite"></p>
+            <div id="admin-profiles"></div>
+            <div class="orders-paging">
+              <button id="admin-profile-previous" type="button">← Previous</button
+              ><span id="admin-profile-page"></span
+              ><button id="admin-profile-next" type="button">Next →</button>
+            </div>
+          </section>
+        </section>
+        <section id="admin-view-dashboard" aria-label="Dashboard">
+          <section
+            id="dashboard-summary"
+            class="dashboard-summary"
+            aria-label="Admin dashboard"
+          ></section>
+          <section class="insights-card">
+            <h2>Order status counts</h2>
+            <p class="repeat-note">
+              Orders placed in each period · current status · India time. Week starts Monday.
+            </p>
+            <div id="dashboard-order-counts"></div>
+          </section>
+          <section class="insights-card">
+            <div class="insights-download-heading">
+              <h2>Most-ordered medicines</h2>
+              <button id="dashboard-excel" type="button" disabled>↓ Download Excel</button>
+            </div>
+            <p class="repeat-note">All non-cancelled orders · ranked by ordered quantity</p>
+            <label
+              >Search medicines<input
+                disabled
+                id="medicine-search"
+                type="search"
+                placeholder="DC or medicine name"
+            /></label>
+            <div id="top-medicines" aria-busy="true">
+              <div class="medicine-state" role="status">
+                <span class="medicine-spinner" aria-hidden="true"></span
+                ><strong>Loading medicines…</strong>
+                <p>Please wait while the medicine list is loaded.</p>
+              </div>
+            </div>
+            <div class="orders-paging">
+              <button disabled id="medicine-previous" type="button">← Previous</button
+              ><span id="medicine-page" aria-live="polite"></span
+              ><button disabled id="medicine-next" type="button">Next →</button>
+            </div>
+          </section>
+        </section>
+        <section id="admin-view-alerts" aria-label="Stock alerts" hidden>
+          <section class="insights-card">
+            <header>
+              <div>
+                <h2>Stock alerts</h2>
+                <p class="repeat-note">
+                  Expiry and low-stock lists from the latest available stock.
+                </p>
+              </div>
+              <div class="alert-filters">
+                <label
+                  >Expiry within days<input
+                    id="alert-days"
+                    type="number"
+                    min="1"
+                    max="365"
+                    value="90" /></label
+                ><label
+                  >Low stock ≤<input
+                    id="alert-low"
+                    type="number"
+                    min="1"
+                    max="1000000"
+                    value="50" /></label
+                ><button id="alert-apply">Apply</button>
+              </div>
+            </header>
+            <div id="stock-alerts" class="alert-grid" aria-busy="true">
+              <article>
+                <h3>Low stock</h3>
+                <div class="medicine-state" role="status">
+                  <span class="medicine-spinner" aria-hidden="true"></span
+                  ><strong>Loading medicines…</strong>
+                  <p>Please wait while stock records are loaded.</p>
+                </div>
+              </article>
+              <article>
+                <h3>Short expiry</h3>
+                <div class="medicine-state" role="status">
+                  <span class="medicine-spinner" aria-hidden="true"></span
+                  ><strong>Loading medicines…</strong>
+                  <p>Please wait while stock records are loaded.</p>
+                </div>
+              </article>
+              <article>
+                <h3>Expired stock</h3>
+                <div class="medicine-state" role="status">
+                  <span class="medicine-spinner" aria-hidden="true"></span
+                  ><strong>Loading medicines…</strong>
+                  <p>Please wait while stock records are loaded.</p>
+                </div>
+              </article>
+            </div>
+            <p id="insights-message" role="status"></p>
+          </section>
+        </section>
+        <section id="admin-view-orders" aria-label="Orders" hidden>
+          <section id="stats" class="orders-stats" aria-label="Order totals"></section>
+          <section class="orders-toolbar">
+            <label
+              >Search<input
+                id="search"
+                placeholder="Store code, mobile or order reference" /></label
+            ><label
+              >Status<select id="status-filter">
+                <option value="">All statuses</option>
+                <option>New</option>
+                <option>Accepted</option>
+                <option>Challan Ready</option>
+                <option>Packed</option>
+                <option>Dispatched</option>
+                <option>Delivered</option>
+                <option>Cancelled</option>
+              </select></label
+            ><button id="refresh">Refresh orders</button>
+          </section>
+          <section class="bulk-toolbar" aria-label="Bulk order update">
+            <div class="bulk-selection">
+              <label><input id="bulk-select-all" type="checkbox" /> Select this page</label
+              ><strong id="bulk-count">0 selected</strong
+              ><button id="bulk-clear" type="button">Clear selection</button>
+            </div>
+            <div class="bulk-fields">
+              <label
+                >Update selected to<select id="bulk-status">
+                  <option value="Accepted">Accepted</option>
+                  <option value="Challan Ready">Challan Ready</option>
+                  <option value="Packed">Packed</option>
+                  <option value="Dispatched">Dispatched</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Cancelled">Cancelled — return stock</option>
+                </select></label
+              ><label
+                >Common note / cancellation reason<textarea
+                  id="bulk-note"
+                  rows="2"
+                  maxlength="1000"
+                  placeholder="Required for cancellation; or use each order’s note"
+                ></textarea></label
+              ><button id="bulk-update" class="orders-primary" disabled>Update Selected</button>
+            </div>
+            <p class="repeat-note">
+              Select up to 30 orders on this page. Each order must follow its allowed next status.
+              For dispatch, Courier and Docket number are optional on each selected Packed order.
+            </p>
+          </section>
+          <div id="bulk-results" class="bulk-results" role="status" aria-live="polite" hidden></div>
+          <div id="orders" class="orders-grid"></div>
+          <footer class="orders-paging">
+            <button id="previous">← Previous</button><span id="page-status"></span
+            ><button id="next">Next →</button>
+          </footer>
+        </section>
+      </div>
+      <p id="message" role="status" aria-live="polite"></p>
+    </main>
+    <dialog id="admin-profile-dialog" class="profile-editor" aria-labelledby="profile-editor-title">
+      <header class="profile-editor-heading">
+        <div>
+          <p>Edit Kendra details</p>
+          <h2 id="profile-editor-title">Update profile</h2>
+        </div>
+        <button id="profile-editor-close" type="button" aria-label="Close profile editor">×</button>
+      </header>
+      <form id="admin-profile-edit">
+        <input name="editVersion" type="hidden" />
+        <div class="profile-editor-fields">
+          <label
+            >Store Code<input
+              name="storeCode"
+              maxlength="40"
+              inputmode="numeric"
+              pattern="[0-9]{1,40}"
+              required
+              type="text" /></label
+          ><label
+            >Mobile number<input
+              name="mobile"
+              maxlength="10"
+              required
+              type="tel"
+              inputmode="numeric"
+              pattern="[0-9]{10}" /></label
+          ><label>DL Form 20 (optional)<input name="dlForm20" type="text" maxlength="100" /></label
+          ><label>DL Form 21 (optional)<input name="dlForm21" type="text" maxlength="100" /></label
+          ><label
+            >Contact person<input name="contactName" maxlength="120" required type="text" /></label
+          ><label class="profile-editor-wide"
+            >Delivery address (optional)<textarea
+              name="address"
+              maxlength="600"
+              rows="3"
+            ></textarea></label
+          ><label>City<input name="city" maxlength="100" required type="text" /></label
+          ><label>State (optional)<input name="state" maxlength="100" type="text" /></label
+          ><label
+            >Delivery PIN code<input
+              name="pincode"
+              maxlength="6"
+              required
+              inputmode="numeric"
+              pattern="[1-9][0-9]{5}" /></label
+          ><label>GSTIN (optional)<input name="gst" maxlength="15" type="text" /></label
+          ><label>Email<input name="email" maxlength="160" type="email" required /></label>
+        </div>
+        <p id="profile-editor-message" role="status" aria-live="polite"></p>
+        <footer class="profile-editor-actions">
+          <button id="profile-editor-cancel" type="button">Cancel</button
+          ><button id="profile-editor-save" type="submit" class="orders-primary">
+            Save changes
+          </button>
+        </footer>
+      </form>
+    </dialog>
+    <script src="js/order-bulk.js"></script>
+    <script src="js/order-excel.js"></script>
+    <script src="js/dashboard-excel.js"></script>
+    <script src="js/operations-view.js"></script>
+    <script src="js/admin-orders.js"></script>
+  </body>
+</html>

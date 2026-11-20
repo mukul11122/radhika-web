@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Upload Stock — Radhika Agencies</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/stock.css" />
+    <style>
+      .upload-wrap {
+        max-width: 760px;
+        margin: 40px auto;
+        padding: 24px;
+      }
+      .upload-wrap .inventory-card {
+        padding: 28px;
+        margin-top: 20px;
+      }
+      .upload-wrap h1 {
+        font:
+          700 30px Inter,
+          system-ui,
+          sans-serif;
+      }
+      .upload-wrap h2 {
+        font:
+          600 20px Inter,
+          system-ui,
+          sans-serif;
+      }
+      .upload-wrap label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 18px;
+      }
+      .upload-wrap input {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #dce3ef;
+        border-radius: 7px;
+        margin-top: 6px;
+      }
+      .upload-wrap button,
+      .upload-wrap .template {
+        display: inline-block;
+        padding: 11px 16px;
+        border: 1px solid #dce3ef;
+        border-radius: 7px;
+        cursor: pointer;
+        font:
+          600 13px Inter,
+          system-ui,
+          sans-serif;
+        margin-top: 20px;
+        background: white;
+      }
+      .upload-wrap .primary {
+        background: #2355cb;
+        color: white;
+      }
+      .upload-wrap p {
+        font-size: 13px;
+        color: #64738d;
+        margin-top: 12px;
+      }
+      .upload-wrap [hidden] {
+        display: none;
+      }
+      .upload-wrap button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      #upload-message {
+        white-space: pre-wrap;
+      }
+      #logout {
+        float: right;
+      }
+      .admin-only-notice {
+        margin-top: 22px;
+        padding: 18px 20px;
+        background: #fff6e5;
+        border: 1px solid #f0d393;
+        border-left: 4px solid #d29a25;
+        border-radius: 10px;
+      }
+      .admin-only-notice strong {
+        display: block;
+        color: #805b12;
+        font-size: 16px;
+      }
+      .upload-wrap .admin-only-notice p {
+        margin: 5px 0 9px;
+        color: #805b12;
+        font-size: 14px;
+      }
+      .admin-only-notice a {
+        color: #2355cb;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: underline;
+      }
+    </style>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#1e4fd6" />
+    <link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Radhika" />
+  </head>
+  <body style="background: #f6f8fc">
+    <main class="upload-wrap">
+      <a href="stock.html" style="color: #2355cb">← Stock directory</a>
+      <a href="admin-orders.html" style="margin-left: 20px; color: #2355cb">Admin Panel →</a>
+      <p class="stock-eyebrow" style="margin-top: 28px">RADHIKA AGENCIES · ADMIN</p>
+      <h1>Upload your stock list</h1>
+      <p>
+        Publish an Excel or CSV stock list for everyone to see. A successful upload replaces the
+        complete previous list.
+      </p>
+      <aside class="admin-only-notice" aria-label="Admin access notice">
+        <strong>Admin access only</strong>
+        <p>This page is for Admin only, not for PMBI users.</p>
+        <a href="stock.html">PMBI users: View Stock Directory →</a>
+      </aside>
+      <section class="inventory-card" id="login-card">
+        <h2>Unlock stock upload</h2>
+        <p>
+          Enter your username and password to choose and publish a file. Access expires after 30
+          minutes.
+        </p>
+        <form id="stock-login">
+          <label>Username<input name="user" autocomplete="username" required /></label
+          ><label>Password<input name="pass" type="password" autocomplete="off" required /></label
+          ><button class="primary" id="login-button">Unlock upload</button>
+        </form>
+      </section>
+      <section class="inventory-card" id="upload-card" hidden>
+        <button id="logout">Lock upload</button>
+        <h2>Choose your stock file</h2>
+        <p>
+          Supported: .xlsx and .csv · maximum 20 MB · no fixed row limit. For an old .xls file, save
+          it as .xlsx first.
+        </p>
+        <a class="template" download href="assets/stock-template.csv">↓ Download CSV template</a>
+        <p>
+          <strong>Required columns:</strong> Drug Code, Drug Name, QTY.<br /><strong
+            >Optional:</strong
+          >
+          UOM Name, Batch No, Exp Date, Sales Rate, Mrp.<br />Use a separate row for each batch.
+          Blank MRP is shown as unavailable.
+        </p>
+        <form id="stock-upload">
+          <label>Stock file<input id="stock-file" type="file" accept=".xlsx,.csv" required /></label
+          ><label style="display: flex; align-items: start; gap: 10px; font-weight: 400"
+            ><input
+              id="replace-confirm"
+              type="checkbox"
+              required
+              style="width: auto; margin-top: 4px"
+            />I understand this file will replace the entire current stock list.</label
+          ><button class="primary" id="upload-button">Upload & publish stock</button>
+        </form>
+      </section>
+      <p id="upload-message" role="status" aria-live="polite"></p>
+    </main>
+    <script src="js/stock-upload.js"></script>
+    <script src="/js/pwa.js" defer></script>
+  </body>
+</html>

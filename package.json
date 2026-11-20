@@ -10,5 +10,14 @@
     "multer": "^2.2.0",
     "mysql2": "^3.23.0",
     "nodemailer": "^6.9.14"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "prettier": "3.6.2"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node tests/test-stock-deduction.cjs && node tests/test-order-races.cjs && node tests/test-large-stock.cjs && node tests/test-stock-export.cjs && node tests/test-tracking.cjs && node tests/test-order-admin.cjs && node tests/test-order-import.cjs && node tests/test-order-insights.cjs && node tests/test-order-bulk.cjs && node tests/test-performance.cjs && node tests/test-performance-store.cjs && node tests/test-operations.cjs && node tests/test-kendra.cjs && node tests/test-alert-sorting.cjs && node tests/test-recovery-email.cjs && node tests/test-stock-management.cjs"
   }
 }

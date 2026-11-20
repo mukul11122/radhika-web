@@ -1,0 +1,8 @@
+.env*
+.freebuff/
+backend/*
+!backend/courier-upload.html
+tests/
+*.zip
+*.log
+*.err

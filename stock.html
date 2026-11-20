@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Stock Directory — Radhika Agencies</title>
+    <link rel="icon" href="assets/img/radhika-logo.png" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/stock.css" />
+    <link rel="stylesheet" href="css/stock-responsive.css" />
+    <link rel="stylesheet" href="css/stock-polish.css" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#1e4fd6" />
+    <link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Radhika" />
+  </head>
+  <body>
+    <div class="stock-top">
+      <span>Authorised Jan Aushadhi Distributor · Dehradun</span
+      ><a href="tel:+917500272292">Call +91 75002 72292 ↗</a>
+    </div>
+    <header class="stock-header">
+      <a class="brand" href="index.html"
+        ><img src="assets/img/radhika-logo.png" alt="" width="44" height="44" /><span
+          >Radhika Agencies<small>Quality medicines. Accessible care.</small></span
+        ></a
+      >
+      <nav aria-label="Main navigation">
+        <a href="index.html">Home</a><a href="medicines.html">Medicines</a
+        ><a class="selected" href="stock.html" aria-current="page">Stock Directory</a
+        ><a href="admin-orders.html" class="admin-panel-nav">Admin Panel</a
+        ><a href="track.html">Track Docket</a><a href="contact.html">Contact</a>
+      </nav>
+    </header>
+    <main class="stock-main">
+      <section class="stock-hero">
+        <div class="directory-heading">
+          <p class="stock-eyebrow">RADHIKA AGENCIES / INVENTORY</p>
+          <h1>
+            Stock directory<span class="live-indicator"><i></i> Live inventory</span>
+          </h1>
+          <p class="intro">Find medicines. Compare batches. Build your order list.</p>
+        </div>
+        <aside class="stock-note">
+          <span class="update-dot"></span>
+          <div>
+            <strong>Latest stock update</strong>
+            <p id="stock-updated">Loading…</p>
+          </div>
+        </aside>
+      </section>
+      <section class="inventory-overview" aria-label="Inventory overview">
+        <div class="overview-tile">
+          <span class="overview-symbol">▦</span>
+          <div><span>Medicines</span><strong id="medicine-total">—</strong></div>
+          <small>Unique drug codes</small>
+        </div>
+        <div class="overview-tile">
+          <span class="overview-symbol">◷</span>
+          <div><span>Expiry groups</span><strong id="expiry-total">—</strong></div>
+          <small>Organised by earliest expiry</small>
+        </div>
+        <div class="overview-tile">
+          <span class="overview-symbol">▤</span>
+          <div><span>Batch records</span><strong id="batch-total">—</strong></div>
+          <small>From the latest uploaded file</small>
+        </div>
+      </section>
+      <section class="inventory-card" aria-labelledby="inventory-title">
+        <div class="card-heading">
+          <div>
+            <p class="stock-eyebrow">MEDICINE INVENTORY</p>
+            <h2 id="inventory-title">
+              Available stock <span id="record-count" class="count"></span>
+            </h2>
+          </div>
+          <div class="card-actions">
+            <a href="kendra.html" class="stock-upload-cta">Kendra Profile</a
+            ><a href="kendra.html#demand" class="stock-upload-cta">Unavailable Medicine Demand</a
+            ><a href="my-orders.html" class="stock-upload-cta">My Orders / History</a>
+            <button
+              id="order-import"
+              type="button"
+              title="Upload Excel (.xlsx) or CSV with DC and Order QTY columns"
+              disabled
+            >
+              ↑ Upload Order Excel / CSV</button
+            ><input
+              id="order-import-file"
+              type="file"
+              accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+              hidden
+            />
+            <button id="stock-excel" type="button" disabled>↓ Download Excel</button
+            ><button id="favourites" aria-pressed="false">
+              ♡ Favourites <span id="fav-count">0</span></button
+            ><button class="primary" id="cart-open" aria-haspopup="dialog">
+              My Order List <span id="cart-count">0</span>
+            </button>
+          </div>
+        </div>
+        <div class="stock-search-total-row">
+          <div class="stock-filters">
+            <label class="search-label"
+              >Find a medicine
+              <div class="search-wrap">
+                <span aria-hidden="true">⌕</span
+                ><input
+                  id="stock-search"
+                  type="search"
+                  placeholder="Type a drug code, medicine name or batch number…"
+                /></div></label
+            ><label hidden
+              >Drug group<select id="stock-group">
+                <option value="">All drug groups</option>
+              </select></label
+            ><button id="clear-search">Reset</button>
+          </div>
+          <div class="stock-selection-total" role="status" aria-live="polite">
+            <span>Total estimated amount <small>All selected medicines · Sales Rate</small></span
+            ><strong id="stock-selection-total">₹0.00</strong>
+          </div>
+        </div>
+        <div class="table-caption">
+          <span id="result-summary" role="status" aria-live="polite"></span
+          ><span class="sample-text">Earliest expiry first within each drug code</span>
+        </div>
+        <div
+          class="stock-table-wrap"
+          tabindex="0"
+          aria-label="Stock records, scroll horizontally for more columns"
+        >
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th><button data-sort="code">DC</button></th>
+                <th><button data-sort="name">Drug Name</button></th>
+                <th>UOM</th>
+                <th>Order Qty</th>
+                <th>Fav</th>
+                <th>Batch No</th>
+                <th><button data-sort="expiry">Exp Date</button></th>
+                <th><button data-sort="available">QTY</button></th>
+                <th>Sales Rate</th>
+                <th>MRP</th>
+              </tr>
+            </thead>
+            <tbody id="stock-rows"></tbody>
+          </table>
+        </div>
+        <div class="stock-pagination">
+          <label
+            >Rows per page
+            <select id="page-size">
+              <option>10</option>
+              <option>20</option>
+              <option>50</option>
+              <option>100</option>
+              <option selected>200</option>
+            </select></label
+          >
+          <div>
+            <button id="previous">← Previous</button
+            ><span id="page-status" aria-live="polite"></span>
+            <form id="page-jump">
+              <label for="page-number">Jump to page</label
+              ><input
+                id="page-number"
+                type="number"
+                min="1"
+                step="1"
+                value="1"
+                inputmode="numeric"
+                required
+              /><button type="submit">Go</button>
+            </form>
+            <button id="next">Next →</button>
+          </div>
+        </div>
+      </section>
+      <p class="stock-footnote">
+        ⓘ Stock details are supplied through the latest upload. Confirm current availability and
+        final price with Radhika Agencies before ordering.
+      </p>
+    </main>
+    <footer class="stock-footer">
+      <span><strong>Radhika Agencies</strong><br />Authorised Jan Aushadhi Distributor</span
+      ><span>Need help finding a medicine? <a href="enquiry.html">Send an enquiry ↗</a></span>
+    </footer>
+    <dialog id="stock-cart" aria-labelledby="cart-title">
+      <div class="cart-heading">
+        <div>
+          <p class="stock-eyebrow">YOUR SELECTION</p>
+          <h2 id="cart-title">My Order List</h2>
+        </div>
+        <button id="cart-close" aria-label="Close list">×</button>
+      </div>
+      <p class="cart-note">
+        Submit your list to Radhika Agencies. Availability and final pricing will be confirmed.
+      </p>
+      <div class="order-contact-fields">
+        <label for="order-store"
+          >Store Code <span aria-hidden="true">*</span
+          ><input
+            id="order-store"
+            type="text"
+            required
+            maxlength="40"
+            pattern="[A-Za-z0-9-]+"
+            autocomplete="off"
+            placeholder="Like 2551" /></label
+        ><label for="order-mobile"
+          >Mobile No. <span aria-hidden="true">*</span
+          ><input
+            id="order-mobile"
+            type="tel"
+            required
+            inputmode="numeric"
+            pattern="[0-9]{10}"
+            maxlength="10"
+            autocomplete="tel-national"
+            placeholder="Enter Whatsapp Mobile No."
+        /></label>
+      </div>
+      <div id="order-profile-summary" class="cart-note"></div>
+      <p class="cart-note"><a href="kendra.html">Save / edit Kendra delivery details</a></p>
+      <div id="cart-items"></div>
+      <div class="cart-total">
+        Estimated total (Sales Rate) <strong id="cart-total">₹0.00</strong>
+      </div>
+      <div class="cart-buttons">
+        <button id="cart-view" type="button">View Cart</button
+        ><button id="cart-clear">Clear list</button
+        ><button class="primary" id="cart-download">Submit</button>
+      </div>
+      <div id="cart-message" role="status" aria-live="polite" tabindex="-1" hidden></div>
+    </dialog>
+    <script src="js/stock-grouping.js"></script>
+    <script src="js/stock-export.js"></script>
+    <script src="js/stock-order-import.js"></script>
+    <script src="js/kendra-profile.js"></script>
+    <script src="js/stock.js"></script>
+    <script src="/js/pwa.js" defer></script>
+  </body>
+</html>

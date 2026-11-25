@@ -601,7 +601,6 @@
       $('medicine-total').textContent = new Set(records.map((r) => r.code)).size.toLocaleString(
         'en-IN'
       );
-      $('expiry-total').textContent = records.length.toLocaleString('en-IN');
       $('batch-total').textContent = (
         Array.isArray(data.items) ? data.items.length : 0
       ).toLocaleString('en-IN');

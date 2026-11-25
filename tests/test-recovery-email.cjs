@@ -36,6 +36,7 @@ const k = require('../lib/kendra'),
     }),
     query: async (sql, a = []) => {
       if (sql.startsWith('CREATE TABLE')) return [{}];
+      if (sql.startsWith('INSERT IGNORE INTO order_serials')) return [{}];
       if (sql.startsWith('INSERT INTO kendra_login_limits')) {
         if (!rates.has(a[0])) rates.set(a[0], 0);
         return [{}];

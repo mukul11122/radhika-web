@@ -238,8 +238,6 @@ const COURIER_TRACKING = [
   { keys: ['xp india', 'xpindia'], url: 'https://tracking.xpindia.in/track-order' },
 ];
 function courierTrackUrl(courier, tracking) {
-  const trackingNo = String(tracking || '').trim();
-  if (!trackingNo) return '';
   const name = String(courier || '')
     .toLowerCase()
     .trim();
@@ -504,7 +502,7 @@ app.get('/api/docket', async (req, res) => {
     res.json({
       ok: true,
       found: dockets.length > 0,
-      dockets: dockets.map((d) => ({ ...d, trackUrl: courierTrackUrl(d.courier, d.tracking) })),
+      dockets: dockets.map((d) => ({ ...d, trackUrl: courierTrackUrl(d.courier, d.tracking || d.docketNo) })),
     });
   } catch (err) {
     console.error(err);
@@ -579,7 +577,7 @@ function stockSecret() {
 function stockSign(payload) {
   return crypto.createHmac('sha256', stockSecret()).update(payload).digest('base64url');
 }
-function stockAuth(req, res, next) {
+async function stockAuth(req, res, next) {
   const secret = stockSecret();
   if (!secret)
     return res.status(503).json({ ok: false, message: 'Stock upload password is not configured.' });
@@ -595,10 +593,18 @@ function stockAuth(req, res, next) {
     )
       throw new Error();
     const data = JSON.parse(Buffer.from(payload, 'base64url').toString());
-    if (data.scope !== 'stock-upload-login' || !Number.isFinite(data.exp) || Date.now() > data.exp)
-      throw new Error();
+    if (data.scope === 'employee-report') {
+      const access = require('../lib/employee-access');
+      const employee = await access.authenticate(db, req.headers.authorization);
+      const section = access.requiredSection(req.method, req.path);
+      if (!section || !employee.sections.includes(section)) return res.status(403).json({ok:false,message:'You do not have access to this section.'});
+      req.employee = employee;
+      req.adminUser = 'Employee: ' + employee.username;
+      return next();
+    }
+    if (data.scope !== 'stock-upload-login' || !Number.isFinite(data.exp) || Date.now() > data.exp) throw new Error();
     req.adminUser = 'mukul';
-    next();
+    return next();
   } catch {
     res.status(401).json({ ok: false, message: 'Enter the stock upload password to continue.' });
   }
@@ -632,6 +638,8 @@ require('../lib/order-insights').register(app, { db, stockAuth });
 require('../lib/operations').register(app, { db, stockAuth });
 require('../lib/admin-dockets').register(app, { db, stockAuth, courierTrackUrl });
 require('../lib/kendra').register(app, { db, stockAuth });
+require('../lib/employees').register(app, { db, stockAuth });
+require('../lib/employee-access').register(app, { db, stockAuth });
 const emailTransport = () =>
   nodemailer.createTransport({
     host: CONFIG.smtp.host,
@@ -911,5 +919,7 @@ app.post('/api/stock/submit', async (req, res) => {
     if (connection) connection.release();
   }
 });
+
+require('../lib/admin-features').register(app, { db, stockAuth });
 
 module.exports = app;

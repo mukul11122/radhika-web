@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Courier — Upload Dockets | Radhika Agencies</title>
-<link rel="icon" href="assets/img/radhika-logo.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/img/radhika-logo.svg" type="image/svg+xml">
 <style>
   :root{--green:#1e4fd6;--green-d:#14318f;--ink:#131a2a;--muted:#5b6678;--alt:#f4f7fc}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -27,7 +27,7 @@
   .hint{font-size:.85rem;color:var(--muted);background:var(--alt);border:1px solid #e2e9f3;border-radius:10px;padding:12px 14px;margin-top:14px}
   .hint code{background:#fff;padding:1px 5px;border-radius:5px;border:1px solid #e2e9f3}
 </style>
-</head>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#1e4fd6"><link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Radhika"></head>
 <body>
 
 <header><div class="wrap"><h1>Courier — Docket Upload</h1><span id="who"></span></div></header>
@@ -124,5 +124,5 @@ document.getElementById('uploadForm').addEventListener('submit',async(e)=>{
 
 if(getToken()){ showPanel(); }
 </script>
-</body>
+<script src="/js/pwa.js" defer></script></body>
 </html>

@@ -68,12 +68,13 @@
       'New',
       'Accepted',
       'Challan Ready',
+      'Under Packing',
       'Packed',
       'Dispatched',
       'Delivered',
       'Cancelled',
     ];
-    counts.columns = Array.from({ length: 8 }, () => ({ width: 19 }));
+    counts.columns = Array.from({ length: 10 }, () => ({ width: 19 }));
     counts.addTable({
       name: 'OrderStatusCounts',
       ref: 'A1',
@@ -96,7 +97,7 @@
     });
     counts.getCell('A7').value =
       'Based on order placed date and current status. India time; Monday starts the week.';
-    counts.mergeCells('A7:H7');
+    counts.mergeCells('A7:J7');
     counts.getCell('A7').alignment = { wrapText: true };
     return book;
   }

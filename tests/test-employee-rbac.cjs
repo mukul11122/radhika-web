@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict');
+const crypto=require('node:crypto');
+process.env.STOCK_UPLOAD_PASSWORD='rbac-test-secret';
+let sections=['orders'], active=1, version=1;
+const queries=[];
+const pool={async query(sql,args=[]){queries.push([sql,args]);if(sql.startsWith('SELECT id,username,name,active,session_version'))return [[{id:'e1',username:'employee',name:'Employee',active,session_version:version}]];if(sql.startsWith('SELECT sections FROM employee_access'))return [[{sections:JSON.stringify(sections)}]];if(sql.startsWith('SELECT COUNT(*) AS total'))return [[{total:0}]];if(sql.startsWith('SELECT COALESCE(m.status'))return [[]];if(sql.startsWith('SELECT r.id,r.payload'))return [[]];return [[]]},async getConnection(){return {async beginTransaction(){},async rollback(){},async commit(){},release(){},async query(sql){if(sql.startsWith('SELECT payload,sent'))return [[{payload:'{}',sent:'[]'}]];if(sql.startsWith('SELECT employee_id FROM order_workflow'))return [[{employee_id:'someone-else'}]];throw Error('unexpected write '+sql)}}}};
+const db=require('../api/db');db.getPool=async()=>pool;
+const app=require('../api/index');
+const payload=Buffer.from(JSON.stringify({scope:'employee-report',id:'e1',ver:1,exp:Date.now()+60000})).toString('base64url');
+const token=payload+'.'+crypto.createHmac('sha256',process.env.STOCK_UPLOAD_PASSWORD).update(payload).digest('base64url');
+const server=app.listen(0,async()=>{try{const base='http://127.0.0.1:'+server.address().port;const call=(path,method='GET',body)=>fetch(base+path,{method,headers:{authorization:'Bearer '+token,'content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+assert.equal((await call('/api/admin/backups','POST',{})).status,403);
+assert.equal((await call('/api/admin/employees')).status,403);
+assert.equal((await call('/api/admin/dashboard')).status,403);
+let res=await call('/api/admin/orders'); assert.equal(res.status,200);assert.ok(queries.filter(([sql])=>sql.includes('FROM stock_requests r')&&(/^(SELECT COUNT|SELECT r.id|SELECT COALESCE)/.test(sql))).every(([sql,args])=>sql.includes('scoped.employee_id=?')&&args.includes('e1')));
+res=await call('/api/admin/orders/other/status','POST',{status:'Accepted'});assert.equal(res.status,403);
+sections=['exports','customer-history','priority','dispatch-report'];
+for (const path of ['/api/admin/export-records?type=orders','/api/admin/customer-orders?store=123','/api/admin/order-priority','/api/admin/dispatch-performance']) { queries.length=0; const result=await call(path); assert.equal(result.status,200,path); const orders=queries.filter(([sql])=>/^SELECT r\./.test(sql) && sql.includes('FROM stock_requests r')); assert.ok(orders.length,path); assert.ok(orders.every(([sql,args])=>sql.includes('w.employee_id=?') && args.includes('e1')),path); }
+sections=[];assert.equal((await call('/api/admin/orders')).status,403);
+sections=['orders'];version=2;assert.equal((await call('/api/admin/orders')).status,401);
+version=1;active=0;assert.equal((await call('/api/admin/orders')).status,401);
+console.log('Employee access, assignment restriction and revocation passed (mock database).');}catch(e){console.error(e);process.exitCode=1}finally{server.close()}});

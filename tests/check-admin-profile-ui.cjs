@@ -36,15 +36,45 @@ const { chromium } = require('@playwright/test'),
             profile = { ...profile, ...route.request().postDataJSON(), editVersion: 'v2' };
             saves++;
             data.message = 'Kendra profile updated.';
-          } else data = { ...data, profiles: [profile], total: 1 };
+          } else {
+            const params = new URL(url).searchParams;
+            const size = Number(params.get('size') || 20), current = Number(params.get('page') || 1);
+            data = { ...data, profiles: [profile], total: 201, page: current, size, pages: Math.ceil(201 / size) };
+          }
         }
-        if (url.includes('/admin/demands')) data.demands = [];
+        if (url.includes('/admin/demands')) {
+          const params = new URL(url).searchParams;
+          const size = Number(params.get('size') || 20), current = Number(params.get('page') || 1);
+          data = { ...data, demands: [], statuses: [], total: 201, page: current, size, pages: Math.ceil(201 / size) };
+        }
         await route.fulfill({ json: data });
       });
       await page.goto('http://localhost:' + server.address().port + '/admin-orders.html');
       await page.locator('[name=username]').fill('test');
       await page.locator('[name=password]').fill('test');
       await page.locator('#login-button').click();
+      await page.locator('[data-admin-view=kendras]').click();
+      await page.locator('#admin-profile-page').filter({ hasText: 'Page 1 of 11' }).waitFor();
+      await page.locator('#admin-profile-size').selectOption('50');
+      await page.locator('#admin-profile-page').filter({ hasText: 'Page 1 of 5' }).waitFor();
+      await page.locator('#admin-profile-jump-input').fill('4');
+      await page.locator('#admin-profile-jump button').click();
+      await page.locator('#admin-profile-page').filter({ hasText: 'Page 4 of 5' }).waitFor();
+      await page.locator('#admin-profile-size').selectOption('200');
+      await page.locator('#admin-profile-page').filter({ hasText: 'Page 1 of 2' }).waitFor();
+      assert.equal(await page.locator('#admin-view-kendras').isVisible(), true);
+      assert.equal(await page.locator('#admin-view-demands').isVisible(), false);
+      await page.locator('[data-admin-view=demands]').click();
+      assert.equal(await page.locator('#admin-view-demands').isVisible(), true);
+      assert.equal(await page.locator('#admin-view-kendras').isVisible(), false);
+      await page.locator('#admin-demand-page').filter({ hasText: 'Page 1 of 11' }).waitFor();
+      await page.locator('#admin-demand-size').selectOption('50');
+      await page.locator('#admin-demand-page').filter({ hasText: 'Page 1 of 5' }).waitFor();
+      await page.locator('#admin-demand-jump-input').fill('4');
+      await page.locator('#admin-demand-jump button').click();
+      await page.locator('#admin-demand-page').filter({ hasText: 'Page 4 of 5' }).waitFor();
+      await page.locator('#admin-demand-size').selectOption('200');
+      await page.locator('#admin-demand-page').filter({ hasText: 'Page 1 of 2' }).waitFor();
       await page.locator('[data-admin-view=kendras]').click();
       await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
       const dialog = page.locator('#admin-profile-dialog');

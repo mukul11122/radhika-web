@@ -176,8 +176,9 @@
       '<p class="ops-scope">' +
       esc(data.duplicateScope || 'Last 24 hours.') +
       ' Alerts do not cancel orders.</p>';
+    const issueIds = issues.map((row) => Number(row.id)).filter((id) => Number.isSafeInteger(id) && id > 0);
     const issueBody = issues.length
-      ? table(
+      ? (issueIds.length ? '<div class="ops-issue-actions"><button type="button" data-clear-failures="' + Math.max(...issueIds) + '">Clear failures</button></div>' : '') + table(
           ['When', 'Page / action', 'Status'],
           issues.map((row) => [
             '<span>' +

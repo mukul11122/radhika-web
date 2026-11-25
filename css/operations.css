@@ -730,3 +730,6 @@
     padding: 14px;
   }
 }
+.ops-issue-actions { display:flex; justify-content:flex-end; margin:-3px 0 12px; }
+.ops-issue-actions button { padding:8px 12px; border:1px solid #d6e1f0; border-radius:8px; background:#f8faff; color:#365992; font-size:11px; }
+.ops-issue-actions button:hover { background:#edf3ff; }

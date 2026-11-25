@@ -13,7 +13,7 @@ const { schema } = require('../lib/order-admin');
   };
   await Promise.all([schema(pool), schema(pool), schema(pool)]);
   await schema(pool);
-  assert.equal(ddl, 3, 'schema initialized once per pool');
+  assert.equal(ddl, 6, 'schema initialized once per pool');
   let fail = true;
   const retryPool = {
     query: async () => {

@@ -105,8 +105,9 @@ const { chromium } = require('@playwright/test'),
     await page.locator('#login-button').click();
     await page.locator('#panel').waitFor({ state: 'visible' });
     await page.locator('[data-admin-view=kendras]').click();
-    await page.getByText('No matching demand requests.', { exact: true }).waitFor();
     await page.getByText('No matching Kendra profiles.', { exact: true }).waitFor();
+    await page.locator('[data-admin-view=demands]').click();
+    await page.getByText('No matching demand requests.', { exact: true }).waitFor();
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= 392));
     assert.equal(errors.length, 0, errors.join('\n'));
     console.log(

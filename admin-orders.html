@@ -23,36 +23,88 @@
         </div>
       </header>
       <section class="orders-login" id="login-card">
-        <h2>Admin access only</h2>
-        <p>Enter your stock-upload username and password. This panel is not for PMBI users.</p>
-        <form id="login-form">
-          <label>Username<input name="username" autocomplete="username" required /></label
-          ><label
-            >Password<input
-              name="password"
-              type="password"
-              autocomplete="current-password"
-              required /></label
-          ><button class="orders-primary" id="login-button">Unlock Admin Panel</button>
-        </form>
+        <div class="admin-login-brand">
+          <a class="admin-login-back" href="stock.html">← &nbsp;Back to Stock Directory</a>
+          <div class="admin-login-intro">
+            <div class="admin-login-identity"><img src="assets/img/radhika-logo.png" alt="" /><span>RADHIKA AGENCIES<small>DEHRADUN</small></span></div>
+            <p class="admin-login-kicker">YOUR OPERATIONS, IN ONE PLACE</p>
+            <h2>Welcome to your<br />admin workspace.</h2>
+            <p>Manage daily operations and keep your business moving.</p>
+            <div class="admin-login-features"><span>Orders</span><span>Stock</span><span>Reports</span></div>
+          </div>
+          <p class="admin-login-brand-footer">Radhika Agencies · Admin Panel</p>
+        </div>
+        <div class="admin-login-form-side">
+          <div class="admin-login-lock" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 1 1 8 0v3M12 14v3"></path></svg></div>
+          <p class="admin-login-form-eyebrow">ADMIN ACCESS</p>
+          <h2>Sign in</h2>
+          <p class="admin-login-help">Enter your stock-upload username and password to continue.</p>
+          <form id="login-form">
+            <label>Username<input name="username" autocomplete="username" placeholder="Enter your username" required /></label>
+            <label>Password<span class="admin-password-field"><input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required /><button id="login-password-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button></span></label>
+            <p id="login-error" role="alert" aria-live="assertive" hidden></p>
+            <button class="orders-primary" id="login-button" type="submit">Sign in to Admin Panel <span aria-hidden="true">→</span></button>
+          </form>
+          <p class="admin-login-note">This login is for administrators only.</p>
+        </div>
       </section>
       <div id="panel" hidden>
         <nav class="admin-tabs" aria-label="Admin sections">
           <button type="button" data-admin-view="dashboard" aria-pressed="true">Dashboard</button
           ><button type="button" data-admin-view="orders" aria-pressed="false">Orders</button
+          ><button type="button" data-admin-view="priority" aria-pressed="false">Order Priority Online</button
+          ><button type="button" data-admin-view="docket-priority" aria-pressed="false">Order Priority By Docket</button
+          ><button type="button" data-admin-view="dispatch-report" aria-pressed="false">Dispatch Performance</button
+          ><button type="button" data-admin-view="employee-workload" aria-pressed="false">Employee Workload</button
+          ><button type="button" data-admin-view="reorder" aria-pressed="false">Reorder Suggestions</button
+          ><button type="button" data-admin-view="customer-history" aria-pressed="false">Customer History</button
+          ><button type="button" data-admin-view="exports" aria-pressed="false">Exports</button
           ><button type="button" data-admin-view="alerts" aria-pressed="false">Stock Alerts</button
           ><button type="button" data-admin-view="operations" aria-pressed="false">
             Operations &amp; Backups</button
           ><button type="button" data-admin-view="kendras" aria-pressed="false">
-            Kendra &amp; Demand</button
+            Kendra Profiles</button
+          ><button type="button" data-admin-view="demands" aria-pressed="false">Medicine Demand</button
           ><button type="button" data-admin-view="stock" aria-pressed="false">Manage Stock</button
-          ><button type="button" data-admin-view="dockets" aria-pressed="false">Docket Records</button><a href="stock-upload.html">↑ Upload Stock File</a>
+          ><button type="button" data-admin-view="dockets" aria-pressed="false">Docket Records</button><button type="button" data-admin-view="employee-accounts" aria-pressed="false">Employee Accounts</button><button type="button" data-admin-view="employees" aria-pressed="false">Employee Reports</button><a href="stock-upload.html">↑ Upload Stock File</a>
         </nav>
+        <div id="admin-notifications" class="admin-notifications" aria-label="Admin notifications" hidden><strong>Alerts</strong><button type="button" data-notification="new">New orders: <span>—</span></button><button type="button" data-notification="low">Low stock: <span>—</span></button><button type="button" data-notification="pending">Pending dispatch: <span>—</span></button><small id="notification-message" role="status"></small></div>
+        <section id="admin-view-dispatch-report" aria-label="Dispatch performance" hidden><section class="insights-card"><p class="priority-eyebrow">DISPATCH</p><h2>Dispatch performance</h2><p class="repeat-note">Orders dispatched in the selected period · on time within 24 hours of order placement · India time, week starts Monday.</p><div class="priority-toolbar"><div class="priority-periods"><button type="button" data-dispatch-period="weekly" aria-pressed="true">This week</button><button type="button" data-dispatch-period="monthly" aria-pressed="false">This month</button></div><button type="button" id="dispatch-refresh">Refresh</button></div><p id="dispatch-message" role="status"></p><div id="dispatch-summary" class="dispatch-summary"></div><div id="dispatch-results"></div><div class="docket-record-paging"><label>Rows per page<select id="dispatch-size"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label><button type="button" id="dispatch-prev">← Previous</button><span id="dispatch-page"></span><button type="button" id="dispatch-next">Next →</button></div></section></section>
+        <section id="admin-view-employee-workload" aria-label="Employee workload" hidden><section class="insights-card"><p class="priority-eyebrow">TEAM MANAGEMENT</p><h2>Employee workload</h2><p class="repeat-note">Current assignments · Pending: New through Packed · Complete: Dispatched or Delivered. Cancelled orders are shown separately.</p><button type="button" id="workload-refresh">Refresh</button><p id="workload-message" role="status"></p><div id="workload-results"></div></section></section>
+        <section id="admin-view-reorder" aria-label="Reorder suggestions" hidden><section class="insights-card"><h2>Stock reorder suggestions</h2><p class="repeat-note">Low stock ≤ 50 · ordered quantity over the last 30 days · cancelled orders excluded. Ranked by recent demand.</p><button type="button" id="reorder-refresh">Refresh</button> <button type="button" id="purchase-download" disabled>↓ Download purchase list</button> <button type="button" id="purchase-clear" disabled>Clear selection</button><p id="purchase-message" role="status" aria-live="polite">Select medicines and enter purchase quantities.</p><p id="reorder-message" role="status"></p><div id="reorder-results"></div><div class="docket-record-paging" aria-label="Reorder suggestion pages"><label>Rows per page<select id="reorder-size"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label><button type="button" id="reorder-prev">← Previous</button><span id="reorder-page"></span><button type="button" id="reorder-next">Next →</button></div></section></section>
+        <section id="admin-view-customer-history" aria-label="Customer order history" hidden><section class="insights-card"><h2>Customer order history</h2><p class="repeat-note">Orders and current status for the selected store.</p><form id="customer-history-form" class="docket-record-filters"><label>Store code<input name="store" maxlength="100" required placeholder="Enter store code"></label><button type="submit">View history</button></form><p id="customer-history-message" role="status"></p><div id="customer-history-results"></div><div class="docket-record-paging" aria-label="Customer order pages"><label>Rows per page<select id="customer-history-size"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label><button type="button" id="customer-history-prev">← Previous</button><span id="customer-history-page"></span><button type="button" id="customer-history-next">Next →</button></div></section></section>
+        <section id="admin-view-exports" aria-label="Export records" hidden><section class="insights-card"><h2>Export orders and dockets</h2><p class="repeat-note">Download all records matching the selected filters.</p><form id="records-export-form" class="docket-record-filters"><label>Record type<select name="type"><option value="orders">Orders</option><option value="dockets">Dockets</option></select></label><label>Store code<input name="store" maxlength="100" placeholder="All stores"></label><label>Status<input name="status" maxlength="40" placeholder="All statuses"></label><label>From date<input name="from" type="date"></label><label>To date<input name="to" type="date"></label><button type="submit">↓ Download Excel</button></form><p id="records-export-message" role="status" aria-live="polite"></p></section></section>
+        <section id="admin-view-priority" aria-label="Order Priority Online" hidden>
+          <section class="insights-card priority-panel"><p class="priority-eyebrow">STORE RANKINGS</p><h2>Order Priority Online</h2><p class="repeat-note">Stores ranked by number of non-cancelled orders placed in the selected period. India time · Week starts Monday.</p>
+            <div class="priority-toolbar"><div class="priority-periods" aria-label="Ranking period"><button type="button" data-priority-period="weekly" aria-pressed="true">This week</button><button type="button" data-priority-period="monthly" aria-pressed="false">This month</button><button type="button" data-priority-period="yearly" aria-pressed="false">This year</button></div><button type="button" id="priority-refresh">Refresh</button></div>
+            <p id="priority-message" role="status" aria-live="polite"></p><div id="priority-chart"></div><div id="priority-results"></div>
+            <div class="docket-record-paging" aria-label="Order priority pages"><label>Rows per page<select id="priority-size"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label><button type="button" id="priority-prev">← Previous</button><span id="priority-page" aria-live="polite"></span><button type="button" id="priority-next">Next →</button><form id="priority-jump"><label>Go to page<input name="page" type="number" min="1" step="1" value="1" required></label><button type="submit">Go</button></form></div>
+          </section>
+        </section>
+        <section id="admin-view-docket-priority" aria-label="Order Priority By Docket" hidden>
+          <section class="insights-card priority-panel"><p class="priority-eyebrow">STORE RANKINGS</p><h2>Order Priority By Docket</h2><p class="repeat-note">Stores ranked by number of docket records by dispatch date. Each record counts once. India time · Week starts Monday.</p>
+            <div class="priority-toolbar"><div class="priority-periods" aria-label="Ranking period"><button type="button" data-docket-priority-period="weekly" aria-pressed="true">This week</button><button type="button" data-docket-priority-period="monthly" aria-pressed="false">This month</button><button type="button" data-docket-priority-period="yearly" aria-pressed="false">This year</button></div><button type="button" id="docket-priority-refresh">Refresh</button></div>
+            <p id="docket-priority-message" role="status" aria-live="polite"></p><div id="docket-priority-chart"></div><div id="docket-priority-results"></div>
+            <div class="docket-record-paging" aria-label="Order priority pages"><label>Rows per page<select id="docket-priority-size"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label><button type="button" id="docket-priority-prev">← Previous</button><span id="docket-priority-page" aria-live="polite"></span><button type="button" id="docket-priority-next">Next →</button><form id="docket-priority-jump"><label>Go to page<input name="page" type="number" min="1" step="1" value="1" required></label><button type="submit">Go</button></form></div>
+          </section>
+        </section>
+        <section id="admin-view-employee-accounts" class="employee-workspace-view" aria-label="Employee accounts" hidden>
+          <div class="employee-workspace-heading"><div><p class="employee-workspace-eyebrow">TEAM MANAGEMENT</p><h2>Employee accounts</h2><p>Create and manage employee access.</p></div><span class="employee-workspace-badge">ADMIN PANEL</span></div>
+          <section class="insights-card employee-panel"><div class="employee-panel-heading"><div><p class="employee-workspace-eyebrow">TEAM ACCESS</p><h2>Employee accounts</h2><p>Create a separate login for each employee and share their details privately.</p></div><span class="employee-panel-icon" aria-hidden="true">♙</span></div>
+            <div class="employee-create-box"><div class="employee-subheading"><strong>Add an employee</strong><span>Set up a new login</span></div><form id="employee-create" class="employee-admin-form"><label>Employee name<input name="employeeName" maxlength="120" placeholder="Full name" required></label><label>Username<input name="employeeUsername" minlength="3" maxlength="40" pattern="[A-Za-z0-9._-]{3,40}" placeholder="Choose username" required></label><label>Password<input name="employeePassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="At least 8 characters" required></label><button class="orders-primary" type="submit">+ Create employee</button></form></div>
+            <div class="employee-list-heading"><strong>Team members</strong><span>Manage access and passwords</span></div><div id="employee-accounts"></div><div class="docket-record-paging" aria-label="Employee account pages"><label>Rows per page <select id="employee-account-limit"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label><button type="button" id="employee-account-prev">← Previous</button><span id="employee-account-page" aria-live="polite"></span><button type="button" id="employee-account-next">Next →</button><form id="employee-account-jump"><label>Go to page <input name="page" type="number" min="1" step="1" value="1" required></label><button type="submit">Go</button></form></div><p id="employee-admin-message" role="status" aria-live="polite"></p>
+          </section>
+        </section>
+        <section id="admin-view-employees" class="employee-workspace-view" aria-label="Employee reports" hidden>
+          <div class="employee-workspace-heading"><div><p class="employee-workspace-eyebrow">WORK ACTIVITY</p><h2>Employee reports</h2><p>Review daily work submitted by your team.</p></div><span class="employee-workspace-badge">ADMIN PANEL</span></div>
+          <section class="insights-card employee-panel employee-progress-panel"><div class="employee-panel-heading"><div><p class="employee-workspace-eyebrow">TEAM PROGRESS</p><h2>Work progress</h2><p>Counts from submitted employee reports, up to the selected date.</p></div><span class="employee-panel-icon" aria-hidden="true">▥</span></div><p class="employee-progress-note">Challans, packing and invoices are separate work counts; they may refer to the same order.</p><form id="employee-report-filter" class="employee-admin-form"><label>Report date<input name="date" type="date" required></label><button class="orders-primary" type="submit">View reports</button></form><div id="employee-progress" aria-live="polite"><p>Loading progress…</p></div></section>
+          <section class="insights-card employee-panel employee-reports-panel"><div class="employee-panel-heading"><div><p class="employee-workspace-eyebrow">WORK ACTIVITY</p><h2>Daily reports</h2><p>Review store-wise work submitted by your team.</p></div><span class="employee-panel-icon" aria-hidden="true">▤</span></div><div id="employee-admin-reports"></div><div class="docket-record-paging" aria-label="Daily report pages"><label>Reports per page <select id="employee-report-limit"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label><button type="button" id="employee-report-prev">← Previous</button><span id="employee-report-page" aria-live="polite"></span><button type="button" id="employee-report-next">Next →</button><form id="employee-report-jump"><label>Go to page <input name="page" type="number" min="1" step="1" value="1" required></label><button type="submit">Go</button></form></div></section>
+        </section>
         <section id="admin-view-dockets" aria-label="Docket records" hidden>
 <section class="insights-card"><h2>Docket Records</h2><p>Daily records by dispatch date. Latest dispatches first.</p>
 <form id="docket-record-search" class="docket-record-filters"><label>Search<input name="q" placeholder="Store code, mobile, docket, courier or owner"></label><label>Dispatch date<select id="docket-record-date"><option value="">All dates</option></select></label><button type="submit">Search</button><button type="button" id="docket-record-refresh">Refresh</button></form>
 <p id="docket-record-message" role="status"></p><div class="docket-record-table"><table><thead><tr><th aria-sort="descending"><button type="button" data-docket-sort="dispatch_date">Dispatch date <span aria-hidden="true">↓</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="organization">Store code <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="store_owner">Owner <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="mobile">Mobile <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="docket_no">Docket / Invoice <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="courier">Courier <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="tracking">Tracking / AWB <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="status">Status <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="boxes">Boxes <span aria-hidden="true">↕</span></button></th><th aria-sort="none"><button type="button" data-docket-sort="items">Items <span aria-hidden="true">↕</span></button></th></tr></thead><tbody id="docket-record-rows"></tbody></table></div>
-<div class="docket-record-paging"><button type="button" id="docket-record-prev">← Previous</button><span id="docket-record-page"></span><button type="button" id="docket-record-next">Next →</button></div></section></section>
+<div class="docket-record-paging" aria-label="Docket record pages"><label>Rows per page <select id="docket-record-limit"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label><button type="button" id="docket-record-prev">← Previous</button><span id="docket-record-page" aria-live="polite"></span><button type="button" id="docket-record-next">Next →</button><form id="docket-record-jump"><label>Go to page <input name="page" type="number" min="1" step="1" value="1" required></label><button type="submit">Go</button></form></div></section></section>
 <section id="admin-view-stock" aria-label="Manage uploaded stock" hidden>
           <section class="insights-card">
             <p class="manage-stock-eyebrow">INVENTORY CONTROL</p>
@@ -87,7 +139,7 @@
               <label class="manage-stock-page-size"
                 >Rows per page
                 <select id="manage-stock-size">
-                  <option>10</option>
+                  <option selected>10</option>
                   <option>20</option>
                   <option>50</option>
                   <option>100</option>
@@ -120,7 +172,7 @@
           <p id="operations-message" class="ops-feedback" role="status" aria-live="polite"></p>
           <div id="operations-content"></div>
         </section>
-        <section id="admin-view-kendras" aria-label="Kendra profiles and demand" hidden>
+        <section id="admin-view-demands" aria-label="Unavailable medicine demand" hidden>
           <section class="insights-card">
             <h2>Unavailable medicine demand</h2>
             <form id="admin-demand-search" class="alert-search-form">
@@ -141,13 +193,17 @@
               ><button type="submit">Search</button>
             </form>
             <p id="admin-demand-message" role="status"></p>
+
             <div id="admin-demands"></div>
-            <div class="orders-paging">
+            <div class="orders-paging"><div class="demand-page-settings"><label>Rows per page<select id="admin-demand-size"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label></div>
               <button id="admin-demand-previous" type="button">← Previous</button
               ><span id="admin-demand-page"></span
               ><button id="admin-demand-next" type="button">Next →</button>
+              <form id="admin-demand-jump" class="alert-page-jump"><label>Page<input id="admin-demand-jump-input" type="number" min="1" step="1" value="1" required /></label><button type="submit">Go</button></form>
             </div>
           </section>
+        </section>
+        <section id="admin-view-kendras" aria-label="Saved Kendra profiles" hidden>
           <section class="insights-card">
             <h2>Saved Kendra profiles</h2>
             <form id="admin-profile-search" class="alert-search-form">
@@ -160,15 +216,18 @@
               ><button type="submit">Search</button>
             </form>
             <p id="admin-profile-message" role="status" aria-live="polite"></p>
+
             <div id="admin-profiles"></div>
-            <div class="orders-paging">
+            <div class="orders-paging"><div class="profile-page-settings"><label>Rows per page<select id="admin-profile-size"><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label></div>
               <button id="admin-profile-previous" type="button">← Previous</button
               ><span id="admin-profile-page"></span
               ><button id="admin-profile-next" type="button">Next →</button>
+              <form id="admin-profile-jump" class="alert-page-jump"><label>Page<input id="admin-profile-jump-input" type="number" min="1" step="1" value="1" required /></label><button type="submit">Go</button></form>
             </div>
           </section>
         </section>
         <section id="admin-view-dashboard" aria-label="Dashboard">
+          <button type="button" id="dashboard-overdue" class="overdue-dashboard" hidden></button>
           <section
             id="dashboard-summary"
             class="dashboard-summary"
@@ -194,6 +253,7 @@
                 type="search"
                 placeholder="DC or medicine name"
             /></label>
+
             <div id="top-medicines" aria-busy="true">
               <div class="medicine-state" role="status">
                 <span class="medicine-spinner" aria-hidden="true"></span
@@ -201,10 +261,11 @@
                 <p>Please wait while the medicine list is loaded.</p>
               </div>
             </div>
-            <div class="orders-paging">
+            <div class="orders-paging"><div class="medicine-page-settings"><label>Rows per page<select id="medicine-size" disabled><option selected>10</option><option>20</option><option>50</option><option>100</option><option>200</option></select></label></div>
               <button disabled id="medicine-previous" type="button">← Previous</button
               ><span id="medicine-page" aria-live="polite"></span
               ><button disabled id="medicine-next" type="button">Next →</button>
+              <form id="medicine-jump" class="alert-page-jump"><label>Page<input id="medicine-jump-input" type="number" min="1" step="1" value="1" required disabled /></label><button type="submit" disabled>Go</button></form>
             </div>
           </section>
         </section>
@@ -277,6 +338,7 @@
                 <option>New</option>
                 <option>Accepted</option>
                 <option>Challan Ready</option>
+                <option>Under Packing</option>
                 <option>Packed</option>
                 <option>Dispatched</option>
                 <option>Delivered</option>
@@ -295,6 +357,7 @@
                 >Update selected to<select id="bulk-status">
                   <option value="Accepted">Accepted</option>
                   <option value="Challan Ready">Challan Ready</option>
+                  <option value="Under Packing">Under Packing</option>
                   <option value="Packed">Packed</option>
                   <option value="Dispatched">Dispatched</option>
                   <option value="Delivered">Delivered</option>
@@ -315,8 +378,9 @@
             </p>
           </section>
           <div id="bulk-results" class="bulk-results" role="status" aria-live="polite" hidden></div>
-          <div id="orders" class="orders-grid"></div>
+          <p id="orders-active-filter" class="active-order-filter" hidden></p><div id="orders" class="orders-grid"></div>
           <footer class="orders-paging">
+            <label class="orders-page-size">Rows per page<select id="orders-page-size"><option selected>10</option><option>20</option><option>30</option><option>50</option><option>100</option><option>200</option></select></label>
             <button id="previous">← Previous</button><span id="page-status"></span
             ><button id="next">Next →</button>
           </footer>
@@ -386,6 +450,8 @@
     <script src="js/order-excel.js"></script>
     <script src="js/dashboard-excel.js"></script>
     <script src="js/operations-view.js"></script>
+    <script src="js/employee-progress.js"></script>
+    <script src="js/employee-admin.js"></script>
     <script src="js/admin-orders.js"></script>
   </body>
 </html>

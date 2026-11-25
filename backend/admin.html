@@ -30,7 +30,7 @@
   .err{color:#c0392b}
   .ok{color:var(--green-d)}
 </style>
-</head>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#1e4fd6"><link rel="apple-touch-icon" href="/assets/pwa/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Radhika"></head>
 <body>
 
 <header><div class="wrap"><h1>Radhika Agencies — Submissions Panel</h1><span id="who"></span></div></header>
@@ -146,5 +146,5 @@ function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&l
 
 if(getToken()) showPanel();
 </script>
-</body>
+<script src="/js/pwa.js" defer></script></body>
 </html>

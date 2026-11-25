@@ -264,6 +264,9 @@ async function getStockAlerts(query) {
   const pool = await stockTable();
   return require('../lib/performance-store').alerts(pool, query);
 }
+async function getLowStockCount(threshold) {
+  return require('../lib/performance-store').lowStockCount(await stockTable(), threshold);
+}
 async function dashboardCached(compute) {
   return require('../lib/performance-store').cachedDashboard(await getPool(), compute);
 }
@@ -278,6 +281,7 @@ module.exports = {
   optimizedOrders: true,
   syncStockRows,
   getStockAlerts,
+  getLowStockCount,
   dashboardCached,
   getPool,
   ping,

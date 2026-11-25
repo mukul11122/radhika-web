@@ -5,35 +5,11 @@
   function workbook(ExcelJS, order) {
     const book = new ExcelJS.Workbook();
     book.creator = 'Radhika Agencies';
-    const sheet = book.addWorksheet('Order', { views: [{ state: 'frozen', ySplit: 11 }] });
+    const sheet = book.addWorksheet('Order', { views: [{ state: 'frozen', ySplit: 1 }] });
     sheet.columns = [{ width: 24 }, { width: 55 }];
-    sheet.mergeCells('A1:B2');
-    const title = sheet.getCell('A1');
-    title.value = 'RADHIKA AGENCIES — ORDER';
-    title.font = { name: 'Calibri', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
-    title.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2355CB' } };
-    title.alignment = { vertical: 'middle', horizontal: 'center' };
-    sheet.getRow(1).height = 24;
-    sheet.getRow(2).height = 24;
-    const metadata = [
-      ['Store Code', String(order.storeCode || '')],
-      ['Mobile No.', String(order.mobile || '')],
-      ['Order reference', String(order.id)],
-      ['Status', String(order.status)],
-      [
-        'Order date',
-        new Date(order.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-      ],
-      ['Courier', String(order.courier || '')],
-      ['Docket number', String(order.docket || '')],
-    ];
-    metadata.forEach((row, i) => {
-      sheet.getRow(i + 3).values = row;
-      sheet.getCell(i + 3, 1).font = { bold: true };
-    });
     sheet.addTable({
       name: 'OrderItems',
-      ref: 'A11',
+      ref: 'A1',
       headerRow: true,
       totalsRow: false,
       style: { theme: 'TableStyleMedium2', showRowStripes: true },

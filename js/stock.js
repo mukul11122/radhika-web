@@ -76,10 +76,7 @@
       detail = records.length
         ? 'Try another search or reset your filters.'
         : 'Uploaded stock will appear here.',
-      action =
-        '<a href="kendra.html?medicine=' +
-        encodeURIComponent($('stock-search').value.trim()) +
-        '#demand">Register medicine demand</a>';
+      action = '<button type="button" data-show-all-stock>Clear search filters</button>';
     if (favouritesOnly) {
       if (!favourites.size) {
         title = 'No favourite medicines yet.';

@@ -42,11 +42,12 @@ function loadPassword() {
       .readFileSync(file, 'utf8')
       .split(/\r?\n/)
       .find((l) => l.startsWith('STOCK_UPLOAD_PASSWORD='));
-    if (line)
-      return line
-        .slice(line.indexOf('=') + 1)
-        .trim()
-        .replace(/^["']|["']$/g, '');
+    const value = line
+      .slice(line.indexOf('=') + 1)
+      .trim()
+      .replace(/^["']|["']$/g, '');
+    // Vercel redacts "sensitive" variables in pulled env files.
+    if (value && value !== '[SENSITIVE]') return value;
   }
   return null;
 }

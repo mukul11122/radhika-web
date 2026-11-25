@@ -73,8 +73,31 @@ assert(restored.note.includes('not restored'));
     assert.equal(syncs, 1);
     assert.equal(snapshot.items[0].id, 'b');
     assert.equal((await post('v1')).status, 409);
+    const pricePost = (prices, auth = 'test') =>
+      fetch(base + '/api/admin/stock/update-prices', {
+        method: 'POST',
+        headers: { authorization: auth, 'content-type': 'application/json' },
+        body: JSON.stringify({ prices }),
+      });
+    assert.equal((await pricePost({ '2': { mrp: 1, salesRate: 1 } }, 'wrong')).status, 401);
+    assert.equal((await pricePost(null)).status, 400);
+    assert.equal((await pricePost({})).status, 400);
+    assert.equal((await pricePost({ '2': { mrp: -1, salesRate: 5 } })).status, 400);
+    assert.equal((await pricePost({ '2': { mrp: 'x', salesRate: 5 } })).status, 400);
+    const priceRevision = snapshot.revision;
+    let priced = await (await pricePost({ '2': { mrp: 12.5, salesRate: 10 } })).json();
+    assert.equal(priced.changed, 1);
+    assert.equal(snapshot.items[0].mrp, 12.5);
+    assert.equal(snapshot.items[0].salesRate, 10);
+    assert.notEqual(snapshot.revision, priceRevision);
+    assert.equal(syncs, 2);
+    priced = await (await pricePost({ '2': { mrp: 12.5, salesRate: 10 } })).json();
+    assert.equal(priced.changed, 0);
+    priced = await (await pricePost({ '999': { mrp: 5, salesRate: 4 } })).json();
+    assert.equal(priced.changed, 0);
+    assert.equal(syncs, 2);
     console.log(
-      'Admin auth, stale revision, exact batch removal, audit, sync, duplicate rejection and cancellation tombstone tests passed. No live stock changed.'
+      'Admin auth, stale revision, exact batch removal, audit, sync, duplicate rejection, cancellation tombstone and DPOS price update tests passed. No live stock changed.'
     );
   } finally {
     server.close();

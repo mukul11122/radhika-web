@@ -3,6 +3,7 @@
 backend/*
 !backend/courier-upload.html
 tests/
+tools/
 *.zip
 *.log
 *.err

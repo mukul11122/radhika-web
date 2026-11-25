@@ -1,0 +1,9 @@
+{
+  "name": "radhika-web-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local maintenance scripts (not deployed to Vercel).",
+  "dependencies": {
+    "mssql": "^11.0.1"
+  }
+}
